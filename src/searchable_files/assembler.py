@@ -151,6 +151,8 @@ def assemble_cli(settings, directory, output, clean):
     for filename in all_filenames(directory):
         entry_docs.extend(build_entries(filename, settings))
 
+    print("=====\nentry_docs = " + json.dumps(entry_docs))
+
     current_doc_id = 0
     batch = []
     for entry in entry_docs:

@@ -1,6 +1,7 @@
 import datetime
 import fnmatch
 import hashlib
+import json
 import os
 import re
 import shutil
@@ -60,6 +61,7 @@ def read_head(filename, settings):
 
 
 def filename2dict(filename, settings):
+    print(json.dumps(filename))
     return {
         "tags": file_tags(filename),
         "extension": extension(filename),
