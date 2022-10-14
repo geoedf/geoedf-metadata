@@ -61,7 +61,8 @@ def read_head(filename, settings):
 
 
 def filename2dict(filename, settings):
-    print(json.dumps(filename))
+    # print(json.dumps(filename))
+    info = os.stat(filename)
     return {
         "tags": file_tags(filename),
         "extension": extension(filename),
@@ -69,6 +70,12 @@ def filename2dict(filename, settings):
         "name": os.path.basename(filename),
         "relpath": filename,
         **stat_dict(filename),
+        "identifier": os.path.basename(filename),
+        "temporalCoverage": "2014-11-01/2018-08-31",
+        "spatialCoverage": {},
+        "dateCreated": datetime.datetime.fromtimestamp(info.st_mtime).isoformat(),
+        "dateModified": datetime.datetime.fromtimestamp(info.st_mtime).isoformat(),
+        "description": read_head(filename, settings),
     }
 
 

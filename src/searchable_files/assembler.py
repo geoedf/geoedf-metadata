@@ -59,6 +59,8 @@ def build_entries(datafile, settings):
         )
         non_default_fields.extend(part["fields"])
     default_entry_data = {k: v for k, v in data.items() if k not in non_default_fields}
+    print("settings.doc_parts = " + str(settings.doc_parts))
+    print("non_default_fields = " + prettyprint_json(non_default_entries))
 
     default_visibility = settings.default_visibility
     if full_filename in settings.file_restrictions:
@@ -150,8 +152,6 @@ def assemble_cli(settings, directory, output, clean):
     entry_docs = []
     for filename in all_filenames(directory):
         entry_docs.extend(build_entries(filename, settings))
-
-    print("=====\nentry_docs = " + json.dumps(entry_docs))
 
     current_doc_id = 0
     batch = []
