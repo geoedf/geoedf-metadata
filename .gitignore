@@ -7,3 +7,7 @@
 /build
 *.egg-info
 /searchable-files
+
+# pycharm and macos
+/.idea/
+.DS_Store
