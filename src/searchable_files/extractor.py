@@ -72,6 +72,7 @@ def filename2dict(filename, settings):
         "relpath": filename,
         **stat_dict(filename),
         "identifier": os.path.basename(filename),
+        "title": os.path.basename(filename),
         "dateCreated": datetime.datetime.fromtimestamp(info.st_mtime).isoformat(),
         "dateModified": datetime.datetime.fromtimestamp(info.st_mtime).isoformat(),
         "description": read_head(filename, settings),
