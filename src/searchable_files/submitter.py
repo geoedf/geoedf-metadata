@@ -50,6 +50,8 @@ def submit_cli(directory, output, index_id):
     with open(task_list_file, "w"):  # empty the file (open in write mode)
         pass
 
+    # ./searchable-files extract && ./searchable-files assemble &&
+    # ./searchable-files submit --index-id 76c5e7eb-6cb6-492c-ba80-7e47abff0586 && ./searchable-files watch
     if not index_id:
         index_info = token_storage_adapter().read_config("index_info")
         if index_info is None:
