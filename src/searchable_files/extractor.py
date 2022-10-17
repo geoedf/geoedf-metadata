@@ -76,9 +76,30 @@ def filename2dict(filename, settings):
         "dateCreated": datetime.datetime.fromtimestamp(info.st_mtime).isoformat(),
         "dateModified": datetime.datetime.fromtimestamp(info.st_mtime).isoformat(),
         "description": read_head(filename, settings),
+        "tt": "123",
+        "cre": "Published",
+        "creativeWorkStatus": "Published",
+        "test": {
+            "test1": "fff",
+        },
 
+        # "subject": filename,
         # schemaorg json
-        "schemaorg_json": schemaorg_json_obj,
+        "schemaorgJson": schemaorg_json_obj,
+        "creator": {
+            "@list": [
+                {
+                    "@type": "Person",
+                    "affiliation": {
+                        "@type": "Organization",
+                        "name": "CEOS"
+                    },
+                    "email": "nxgeilfus@gmail.com",
+                    "name": "Nicolas-XavierGeilfus",
+                    "url": "https://www.hydroshare.org/user/10458/"
+                }
+            ]
+        },
 
     }
 
