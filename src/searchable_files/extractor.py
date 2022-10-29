@@ -10,6 +10,7 @@ import click
 import ruamel.yaml
 from identify import identify
 
+from .extract.extract_metadata import extract_metadata
 from .lib import all_filenames, common_options, prettyprint_json
 
 yaml = ruamel.yaml.YAML(typ="safe")
@@ -64,6 +65,7 @@ def filename2dict(filename, settings):
     # print(json.dumps(filename))
     info = os.stat(filename)
     schemaorg_json_obj = metadata2schemaorg(filename, settings)
+    schemaorg_json_obj_static = metadata2schemaorg_static(filename, settings)
     return {
         "tags": file_tags(filename),
         "extension": extension(filename),
@@ -76,35 +78,38 @@ def filename2dict(filename, settings):
         "dateCreated": datetime.datetime.fromtimestamp(info.st_mtime).isoformat(),
         "dateModified": datetime.datetime.fromtimestamp(info.st_mtime).isoformat(),
         "description": read_head(filename, settings),
-        "tt": "123",
-        "cre": "Published",
-        "creativeWorkStatus": "Published",
-        "test": {
-            "test1": "fff",
-        },
 
         # "subject": filename,
+
         # schemaorg json
         "schemaorgJson": schemaorg_json_obj,
-        "creator": {
-            "@list": [
-                {
-                    "@type": "Person",
-                    "affiliation": {
-                        "@type": "Organization",
-                        "name": "CEOS"
-                    },
-                    "email": "nxgeilfus@gmail.com",
-                    "name": "Nicolas-XavierGeilfus",
-                    "url": "https://www.hydroshare.org/user/10458/"
-                }
-            ]
-        },
+        # "schemaorgJson": schemaorg_json_obj,
+        # "creator": {
+        #     "@list": [
+        #         {
+        #             "@type": "Person",
+        #             "affiliation": {
+        #                 "@type": "Organization",
+        #                 "name": "CEOS"
+        #             },
+        #             "email": "nxgeilfus@gmail.com",
+        #             "name": "Nicolas-XavierGeilfus",
+        #             "url": "https://www.hydroshare.org/user/10458/"
+        #         }
+        #     ]
+        # },
 
     }
 
 
 def metadata2schemaorg(filename, settings):
+    rsp = extract_metadata(filename)
+    return {
+        "key": "value",
+    }
+
+
+def metadata2schemaorg_static(filename, settings):
     return {
         "@context": "https://schema.org",
         "@id": "https://doi.org/10.4211/hs.a3c0d38322fc46ea96ecea2438b29283#schemaorg",
@@ -121,6 +126,7 @@ def metadata2schemaorg(filename, settings):
 
         "inLanguage": "en-US",
 
+        # todo
         # "identifier": [
         #     {
         #         "filename": os.path.basename(filename),
