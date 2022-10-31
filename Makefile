@@ -1,14 +1,14 @@
 install: .venv
-	.venv/bin/python setup.py -q develop
+	/Users/butterkeks/anaconda3/envs/geoedf/bin/python setup.py -q develop
 	rm -f searchable-files
-	ln -s ".venv/bin/searchable-files" searchable-files
+	ln -s "/Users/butterkeks/anaconda3/envs/geoedf/bin/searchable-files" searchable-files
 
 lint:
 	pre-commit run -a
 
 .venv:
-	virtualenv --python=python3 .venv
-	.venv/bin/python -m pip install -q -U pip setuptools
+	virtualenv --python=python3 /Users/butterkeks/anaconda3/envs/geoedf/
+	/Users/butterkeks/anaconda3/envs/geoedf/bin/python -m pip install -q -U pip setuptools
 
 clean:
 	find -name '*.pyc' -delete

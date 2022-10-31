@@ -62,10 +62,11 @@ def read_head(filename, settings):
 
 
 def filename2dict(filename, settings):
-    # print(json.dumps(filename))
+    print("===========\nfilename: " + filename)
+
     info = os.stat(filename)
     schemaorg_json_obj = metadata2schemaorg(filename, settings)
-    schemaorg_json_obj_static = metadata2schemaorg_static(filename, settings)
+    # schemaorg_json_obj_static = metadata2schemaorg_static(filename, settings)
     return {
         "tags": file_tags(filename),
         "extension": extension(filename),
@@ -83,29 +84,125 @@ def filename2dict(filename, settings):
 
         # schemaorg json
         "schemaorgJson": schemaorg_json_obj,
-        # "schemaorgJson": schemaorg_json_obj,
-        # "creator": {
-        #     "@list": [
-        #         {
-        #             "@type": "Person",
-        #             "affiliation": {
-        #                 "@type": "Organization",
-        #                 "name": "CEOS"
-        #             },
-        #             "email": "nxgeilfus@gmail.com",
-        #             "name": "Nicolas-XavierGeilfus",
-        #             "url": "https://www.hydroshare.org/user/10458/"
-        #         }
-        #     ]
-        # },
 
     }
 
 
 def metadata2schemaorg(filename, settings):
     rsp = extract_metadata(filename)
+    print(json.dumps(rsp))
+
+    return idata2schemaorg(filename, rsp, settings)
+
+
+def idata2schemaorg(filename, data, settings):
+    spatial_coverage = get_spatial_coverage(data)
+    creator = get_creator(data)
+    identifier = get_identifier_list(data)
+
+    schemaorg_json = {
+        "@context": "https://schema.org",
+        "@id": "link",
+        "sameAs": "link",
+        "url": "link",
+
+        "@type": "Dataset",
+        "additionalType": "link",
+        "name": os.path.basename(filename),
+        "description": read_head(filename, settings),
+        "keywords": ["Greenhouse gases", "landfast", "Sea ice", "Gas"],
+
+        "creativeWorkStatus": "Published",
+
+        # "inLanguage": "en-US",
+
+        "identifier": identifier,
+
+        "creator": creator,
+
+        "temporalCoverage": "2014-05-24/2014-06-24",
+
+        "spatialCoverage": spatial_coverage,
+
+        "publisher": {
+            "@id": "https://www.hydroshare.org"
+        },
+
+        "provider": {
+            "@id": "https://www.hydroshare.org",
+            "@type": "Organization",
+            "name": "HydroShare",
+            "url": "https://www.hydroshare.org"
+        },
+        "includedInDataCatalog": {
+            "@type": "DataCatalog",
+            "name": "HydroShare",
+            "url": "https://www.hydroshare.org/search/"
+        },
+
+        "license": {
+            "@type": "CreativeWork",
+            "text": "This resource is shared under the Creative Commons Attribution CC BY.",
+            "url": "http://creativecommons.org/licenses/by/4.0/"
+        },
+
+        "isAccessibleForFree": True,
+
+        "datePublished": "2022-09-14T17:35:27.897468+00:00",
+        "subjectOf": {
+            "@type": "DataDownload",
+            "name": "resourcemetadata.xml",
+            "description": "Dublin Core Metadata Document Describing the Dataset",
+            "url": "https://www.hydroshare.org/hsapi/resource/a3c0d38322fc46ea96ecea2438b29283/scimeta/",
+            "encodingFormat": "application/rdf+xml"
+        },
+    }
+
+    return schemaorg_json
+
+
+def get_spatial_coverage(data):
+    return {  # todo: two kinds of coverage, point/shape
+        "@type": "Place",
+        "geo": {
+            "@type": "GeoShape",
+            "box": "39.3280 120.1633 40.445 123.7878"
+        }
+    }
+
+
+def get_identifier_list(data):
+    if data is None:
+        return None
+    identifier = {
+        # "filename": data['identifier'],
+        # "@id": data['id'],
+        "@type": "PropertyValue",  # todo 了解property value
+        # "url": data['url'],
+    }
+    if "identifier" in data:
+        identifier['filename'] = data['identifier']
+    if "id" in data:
+        identifier['@id'] = data['id']
+    if "url" in data:
+        identifier['url'] = data['url']
+    return [identifier]
+
+
+def get_creator(data):
     return {
-        "key": "value",
+        "@list": [
+            {
+                "@type": "Person",
+                "affiliation": {
+                    "@type": "Organization",
+                    "name": "CEOS"
+                },
+                "email": "nxgeilfus@gmail.com",
+                "name": "Nicolas-Xavier Geilfus",
+                "url": "https://www.hydroshare.org/user/10458/"
+            }
+        ]
     }
 
 
@@ -294,7 +391,10 @@ def extract_cli(settings, directory, output, clean):
 
     rendered_data = {}
     for filename in all_filenames("."):
-        rendered_data[filename] = filename2dict(filename, settings)
+        # name, ext = os.path.splitext(filename)
+        # print(name + ", " + ext + ".")
+        if not filename.endswith(".DS_Store"):
+            rendered_data[filename] = filename2dict(filename, settings)
 
     os.chdir(old_cwd)
     for filename, data in rendered_data.items():

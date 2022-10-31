@@ -1,3 +1,5 @@
+import json
+
 from osgeo import gdal, ogr
 import netCDF4
 import numpy
