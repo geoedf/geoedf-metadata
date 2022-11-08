@@ -41,6 +41,7 @@ def _add_annotations(data, annotations):
 
 
 def build_entries(datafile, settings):
+    print("reading " + datafile)
     # read data
     with open(datafile) as fp:
         data = json.load(fp)
@@ -151,7 +152,8 @@ def assemble_cli(settings, directory, output, clean):
 
     entry_docs = []
     for filename in all_filenames(directory):
-        entry_docs.extend(build_entries(filename, settings))
+        if not filename.endswith(".DS_Store"):
+            entry_docs.extend(build_entries(filename, settings))
 
     current_doc_id = 0
     batch = []

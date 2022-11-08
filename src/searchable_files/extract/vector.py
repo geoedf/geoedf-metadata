@@ -34,8 +34,6 @@ def getMetadata(filepath):
         driver = ogr.GetDriverByName('KML')
     elif (ext == '.shp'):
         driver = ogr.GetDriverByName('ESRI Shapefile')
-    else:
-        driver = ogr.GetDriverByName('ESRI Shapefile')
 
     with open('/tmp/messages.txt', 'a+') as logfile:
         logfile.write('\n get shp metadata %s' % filepath)

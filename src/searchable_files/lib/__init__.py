@@ -17,7 +17,8 @@ def common_options(f):
 def all_filenames(directory):
     for dirpath, _dirnames, filenames in os.walk(directory):
         for f in filenames:
-            yield os.path.relpath(os.path.join(dirpath, f))
+            if not f.endswith(".DS_Store"):
+                yield os.path.relpath(os.path.join(dirpath, f))
 
 
 def prettyprint_json(obj, fp=None):

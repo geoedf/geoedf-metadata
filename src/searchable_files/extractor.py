@@ -10,6 +10,7 @@ import click
 import ruamel.yaml
 from identify import identify
 
+from .extract.converter import idata2schemaorg
 from .extract.extract_metadata import extract_metadata
 from .lib import all_filenames, common_options, prettyprint_json
 
@@ -61,25 +62,42 @@ def read_head(filename, settings):
     return data[: settings.head_length]
 
 
-def filename2dict(filename, settings):
-    print("===========\nfilename: " + filename)
-
+def get_basic_info(filename, settings):
     info = os.stat(filename)
-    schemaorg_json_obj = metadata2schemaorg(filename, settings)
-    # schemaorg_json_obj_static = metadata2schemaorg_static(filename, settings)
+
     return {
         "tags": file_tags(filename),
         "extension": extension(filename),
-        "head": read_head(filename, settings),
         "name": os.path.basename(filename),
+        "identifier": os.path.basename(filename),
+        "title": os.path.basename(filename),
+        "dateCreated": datetime.datetime.fromtimestamp(info.st_mtime).isoformat(),
+        "dateModified": datetime.datetime.fromtimestamp(info.st_mtime).isoformat(),
+        "description": read_head(filename, settings),
+    }
+
+
+def filename2dict(filename, settings):
+    print("===========\nfilename: " + filename)
+    info = os.stat(filename)
+
+    schemaorg_json_obj = metadata2schemaorg(filename, settings)
+    # schemaorg_json_obj_static = metadata2schemaorg_static(filename, settings)
+    return {
         "relpath": filename,
         **stat_dict(filename),
+        "head": read_head(filename, settings),
+        "tags": file_tags(filename),
+        "extension": extension(filename),
+        "name": os.path.basename(filename),
         "identifier": os.path.basename(filename),
         "title": os.path.basename(filename),
         "dateCreated": datetime.datetime.fromtimestamp(info.st_mtime).isoformat(),
         "dateModified": datetime.datetime.fromtimestamp(info.st_mtime).isoformat(),
         "description": read_head(filename, settings),
 
+
+        "basicInfo": get_basic_info(filename, settings),
         # "subject": filename,
 
         # schemaorg json
@@ -93,117 +111,6 @@ def metadata2schemaorg(filename, settings):
     print(json.dumps(rsp))
 
     return idata2schemaorg(filename, rsp, settings)
-
-
-def idata2schemaorg(filename, data, settings):
-    spatial_coverage = get_spatial_coverage(data)
-    creator = get_creator(data)
-    identifier = get_identifier_list(data)
-
-    schemaorg_json = {
-        "@context": "https://schema.org",
-        "@id": "link",
-        "sameAs": "link",
-        "url": "link",
-
-        "@type": "Dataset",
-        "additionalType": "link",
-        "name": os.path.basename(filename),
-        "description": read_head(filename, settings),
-        "keywords": ["Greenhouse gases", "landfast", "Sea ice", "Gas"],
-
-        "creativeWorkStatus": "Published",
-
-        # "inLanguage": "en-US",
-
-        "identifier": identifier,
-
-        "creator": creator,
-
-        "temporalCoverage": "2014-05-24/2014-06-24",
-
-        "spatialCoverage": spatial_coverage,
-
-        "publisher": {
-            "@id": "https://www.hydroshare.org"
-        },
-
-        "provider": {
-            "@id": "https://www.hydroshare.org",
-            "@type": "Organization",
-            "name": "HydroShare",
-            "url": "https://www.hydroshare.org"
-        },
-        "includedInDataCatalog": {
-            "@type": "DataCatalog",
-            "name": "HydroShare",
-            "url": "https://www.hydroshare.org/search/"
-        },
-
-        "license": {
-            "@type": "CreativeWork",
-            "text": "This resource is shared under the Creative Commons Attribution CC BY.",
-            "url": "http://creativecommons.org/licenses/by/4.0/"
-        },
-
-        "isAccessibleForFree": True,
-
-        "datePublished": "2022-09-14T17:35:27.897468+00:00",
-        "subjectOf": {
-            "@type": "DataDownload",
-            "name": "resourcemetadata.xml",
-            "description": "Dublin Core Metadata Document Describing the Dataset",
-            "url": "https://www.hydroshare.org/hsapi/resource/a3c0d38322fc46ea96ecea2438b29283/scimeta/",
-            "encodingFormat": "application/rdf+xml"
-        },
-    }
-
-    return schemaorg_json
-
-
-def get_spatial_coverage(data):
-    return {  # todo: two kinds of coverage, point/shape
-        "@type": "Place",
-        "geo": {
-            "@type": "GeoShape",
-            "box": "39.3280 120.1633 40.445 123.7878"
-        }
-    }
-
-
-def get_identifier_list(data):
-    if data is None:
-        return None
-    identifier = {
-        # "filename": data['identifier'],
-        # "@id": data['id'],
-        "@type": "PropertyValue",  # todo 了解property value
-        # "url": data['url'],
-    }
-    if "identifier" in data:
-        identifier['filename'] = data['identifier']
-    if "id" in data:
-        identifier['@id'] = data['id']
-    if "url" in data:
-        identifier['url'] = data['url']
-    return [identifier]
-
-
-def get_creator(data):
-    return {
-        "@list": [
-            {
-                "@type": "Person",
-                "affiliation": {
-                    "@type": "Organization",
-                    "name": "CEOS"
-                },
-                "email": "nxgeilfus@gmail.com",
-                "name": "Nicolas-Xavier Geilfus",
-                "url": "https://www.hydroshare.org/user/10458/"
-            }
-        ]
-    }
 
 
 def metadata2schemaorg_static(filename, settings):
@@ -393,8 +300,7 @@ def extract_cli(settings, directory, output, clean):
     for filename in all_filenames("."):
         # name, ext = os.path.splitext(filename)
         # print(name + ", " + ext + ".")
-        if not filename.endswith(".DS_Store"):
-            rendered_data[filename] = filename2dict(filename, settings)
+        rendered_data[filename] = filename2dict(filename, settings)
 
     os.chdir(old_cwd)
     for filename, data in rendered_data.items():
