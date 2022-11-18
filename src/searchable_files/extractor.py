@@ -78,7 +78,7 @@ def get_basic_info(filename, settings):
 
 
 def filename2dict(filename, settings):
-    print("===========\nfilename: " + filename)
+    print("\n===========\nfilename: " + filename)
     info = os.stat(filename)
 
     schemaorg_json_obj = metadata2schemaorg(filename, settings)

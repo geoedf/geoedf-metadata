@@ -4,13 +4,15 @@ import datetime
 
 def idata2schemaorg(filename, data, settings):
     info = os.stat(filename)
-    spatial_coverage = get_spacial_coverage(data)
+    # print(data)
+    spatial_coverage = get_spatial_coverage(data)
+    print("spatial_coverage" + str(spatial_coverage))
     creator = get_creator(data)
     identifier = get_identifier_list(data)
 
     schemaorg_json = {
         "@context": "https://schema.org",
-        "@id": os.path.basename(filename), # should be a url
+        "@id": os.path.basename(filename),  # should be a url
         "sameAs": "link",
         "url": "link",
 
@@ -70,20 +72,28 @@ def idata2schemaorg(filename, data, settings):
     return schemaorg_json
 
 
-def get_spacial_coverage(data):
+def get_spatial_coverage(data):
     if data is None:
+        print(1)
         return None
-    if "spacial_coverage" in data:
-        spacial_coverage = data['spacial_coverage']
-        box = spacial_coverage['west_limit']
-        return {  # todo: two kinds of coverage, point/shape
-            "@type": "Place",
-            "geo": {
-                "@type": "GeoShape",
-                "box": "39.3280 120.1633 40.445 123.7878"
-            }
+
+    spatial_data_fields = ['southlimit', 'westlimit', 'northlimit', 'eastlimit', ]
+    # todo lat lon
+    for field in spatial_data_fields:
+        if field not in data:
+            print(2)
+            return None
+
+    box = '%f %f %f %f' % (
+        data['southlimit'], data['westlimit'], data['northlimit'], data['eastlimit'])
+
+    return {  # todo: two kinds of coverage, point/shape
+        "@type": "Place",
+        "geo": {
+            "@type": "GeoShape",
+            "box": box
         }
-    return None
+    }
 
 
 def get_identifier_list(data):

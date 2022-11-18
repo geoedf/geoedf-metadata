@@ -66,7 +66,7 @@ def geoData(data, filepath):
     # if all four components were found, add the coverage field
     if len(coverage) == 4:
         data['coverage'] = 'ENVELOPE(%f,%f,%f,%f)' % (
-        coverage['lonmin'], coverage['lonmax'], coverage['latmax'], coverage['latmin'])
+            coverage['lonmin'], coverage['lonmax'], coverage['latmax'], coverage['latmin'])
 
     # mappings common to all types of documents
     for key, value in data.items():
@@ -74,6 +74,6 @@ def geoData(data, filepath):
             data[COMMON_MAPPINGS[key]] = data.pop(key)
         elif data[key] == 'subdata':
             for subname, (subkey, subvalue) in data['subdata'].items():
-                if subkey in COMMON_MAPPPINGS:
+                if subkey in COMMON_MAPPINGS:
                     data['subdata'][subname][COMMON_MAPPINGS[subkey]] = metadata['subdata'][subname].pop(subkey)
     return data

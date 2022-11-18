@@ -71,7 +71,8 @@ def getMetadata(filepath):
 
         longitudes = [ul.GetX(), ll.GetX(), lr.GetX(), ur.GetX()]
         latitudes = [ul.GetY(), ll.GetY(), lr.GetY(), ur.GetY()]
-
+        print("longitudes" + str(longitudes))
+        print("latitudes" + str(latitudes))
     except:
         with open(LOG_PATH, 'a+') as logfile:
             logfile.write('could not get raster projection, assuming WGS84')

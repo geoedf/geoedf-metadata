@@ -7,7 +7,8 @@ from .vector_files import kml
 from .vector_files import shp
 import os.path
 
-extensions = ['.gml', '.kml', '.shp', '.dbf', '.prj', '.shx']
+# extensions = ['.gml', '.kml', '.shp', '.dbf', '.prj', '.shx']
+extensions = ['.shp']
 shapefile_components = ['.shp', '.dbf', '.prj', '.shx']
 
 
@@ -45,6 +46,7 @@ def getMetadata(filepath):
     # get extent
     layer = datasource.GetLayer()
     extent = layer.GetExtent()
+    print("layer" + str(layer))
     if extent is not None:
         data['westlimit'] = extent[0]
         data['eastlimit'] = extent[1]
