@@ -20,7 +20,7 @@ def idata2schemaorg(filename, data, settings):
         "additionalType": "link",
         "name": os.path.basename(filename),
         # "description": read_head(filename, settings),
-        "keywords": ["Greenhouse gases", "landfast", "Sea ice", "Gas"],
+        "keywords": ["Keyword1", "Keyword2", "Keyword3"],
 
         "creativeWorkStatus": "Published",
 
@@ -30,7 +30,7 @@ def idata2schemaorg(filename, data, settings):
 
         "creator": creator,
 
-        "temporalCoverage": "2014-05-24/2014-06-24",
+        "temporalCoverage": "2018-05-24/2018-06-24",
 
         "spatialCoverage": spatial_coverage,
 
@@ -40,15 +40,15 @@ def idata2schemaorg(filename, data, settings):
         },
 
         "provider": {
-            "@id": "https://www.hydroshare.org",
+            "@id": "provider id",
             "@type": "Organization",
-            "name": "HydroShare",
-            "url": "https://www.hydroshare.org"
+            "name": "Yiqing Qu",
+            "url": ""
         },
         "includedInDataCatalog": {
             "@type": "DataCatalog",
-            "name": "HydroShare",
-            "url": "https://www.hydroshare.org/search/"
+            "name": "GeoEDF",
+            "url": "link"
         },
 
         "license": {
@@ -63,8 +63,8 @@ def idata2schemaorg(filename, data, settings):
         "subjectOf": {
             "@type": "DataDownload",
             "name": "resourcemetadata.xml",
-            "description": "Dublin Core Metadata Document Describing the Dataset",
-            "url": "https://www.hydroshare.org/hsapi/resource/a3c0d38322fc46ea96ecea2438b29283/scimeta/",
+            "description": "Description about the dataset",
+            "url": "link",
             "encodingFormat": "application/rdf+xml"
         },
     }
@@ -74,17 +74,17 @@ def idata2schemaorg(filename, data, settings):
 
 def get_spatial_coverage(data):
     if data is None:
-        print(1)
         return None
 
     spatial_data_fields = ['southlimit', 'westlimit', 'northlimit', 'eastlimit', ]
+    # spatial_data_fields = ['latmin', 'lonmin', 'latmax', 'lonmax', ]
     # todo lat lon
     for field in spatial_data_fields:
         if field not in data:
-            print(2)
             return None
 
     box = '%f %f %f %f' % (
+        # data['latmin'], data['lonmin'], data['latmax'], data['lonmax'])
         data['southlimit'], data['westlimit'], data['northlimit'], data['eastlimit'])
 
     return {  # todo: two kinds of coverage, point/shape
@@ -100,10 +100,7 @@ def get_identifier_list(data):
     if data is None:
         return None
     identifier = {
-        # "filename": data['identifier'],
-        # "@id": data['id'],
         "@type": "PropertyValue",  # todo 了解property value
-        # "url": data['url'],
     }
     if "identifier" in data:
         identifier['filename'] = data['identifier']
@@ -125,9 +122,9 @@ def get_creator(data):
                     "@type": "Organization",
                     "name": "Test Affiliation Name"
                 },
-                "email": "nxgeilfus@gmail.com",
+                "email": "affliation@gmail.com",
                 "name": "Test Creator Name",
-                "url": "https://www.hydroshare.org/user/10458/"
+                "url": "user's profile link"
             }
         ]
     }

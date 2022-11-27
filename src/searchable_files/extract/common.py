@@ -45,7 +45,7 @@ def commonData(data, filepath):
     if 'url' not in data or data['url'] is None:
         data['url'] = 'http://129.114.16.188'
 
-    # TODO: what should this be?
+    # TODO: what should this be
     if 'access_level' not in data or data['access_level'] is None:
         data['access_level'] = 'public'
 
