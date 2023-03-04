@@ -1,24 +1,29 @@
 import os
 import datetime
+import time
+import uuid
 
+RESOURCE_URL_PREFIX = "https://geoedf-portal.anvilcloud.rcac.purdue.edu/resource"
+SITE_URL_PREFIX = "https://geoedf-portal.anvilcloud.rcac.purdue.edu"
 
-def idata2schemaorg(filename, data, settings):
+def idata2schemaorg(filename, data, file_uuid, settings):
     info = os.stat(filename)
     # print(data)
     spatial_coverage = get_spatial_coverage(data)
     print("spatial_coverage" + str(spatial_coverage))
     creator = get_creator(data)
-    identifier = get_identifier_list(data)
+    identifier = get_identifier_list(data, file_uuid)
 
     schemaorg_json = {
         "@context": "https://schema.org",
-        "@id": os.path.basename(filename),  # should be a url
-        "sameAs": "link",
-        "url": "link",
+        "@id": file_uuid,  # should be a url
+        "sameAs": f'{RESOURCE_URL_PREFIX}/{file_uuid}',
+        "url": f'{RESOURCE_URL_PREFIX}/{file_uuid}',
 
         "@type": "Dataset",
         "additionalType": "link",
         "name": os.path.basename(filename),
+        "description": f'This publication {os.path.basename(filename)} is a resource in GeoEDF Portal. ',
         # "description": read_head(filename, settings),
         "keywords": ["Keyword1", "Keyword2", "Keyword3"],
 
@@ -43,12 +48,12 @@ def idata2schemaorg(filename, data, settings):
             "@id": "provider id",
             "@type": "Organization",
             "name": "Yiqing Qu",
-            "url": ""
+            "url": f'{RESOURCE_URL_PREFIX}/{file_uuid}'
         },
         "includedInDataCatalog": {
             "@type": "DataCatalog",
             "name": "GeoEDF",
-            "url": "link"
+            "url": f'{SITE_URL_PREFIX}'
         },
 
         "license": {
@@ -59,12 +64,12 @@ def idata2schemaorg(filename, data, settings):
 
         "isAccessibleForFree": True,
         "dateModified": datetime.datetime.fromtimestamp(info.st_mtime).isoformat(),
-        "datePublished": datetime.datetime.fromtimestamp(info.st_mtime).isoformat(),
+        "datePublished": datetime.datetime.now().isoformat(),
         "subjectOf": {
             "@type": "DataDownload",
             "name": "resourcemetadata.xml",
             "description": "Description about the dataset",
-            "url": "link",
+            "url": f'{RESOURCE_URL_PREFIX}/{file_uuid}',
             "encodingFormat": "application/rdf+xml"
         },
     }
@@ -96,7 +101,7 @@ def get_spatial_coverage(data):
     }
 
 
-def get_identifier_list(data):
+def get_identifier_list(data, file_uuid):
     if data is None:
         return None
     identifier = {
@@ -107,13 +112,13 @@ def get_identifier_list(data):
     if "id" in data:
         identifier['@id'] = data['id']
     if "url" in data:
-        identifier['url'] = data['url']
+        identifier['url'] = f'{RESOURCE_URL_PREFIX}/{file_uuid}'
     return [identifier]
 
 
 def get_creator(data):
-    if data is None:
-        return None
+    # if data is None:
+    #     return None
     return {
         "@list": [
             {
@@ -123,8 +128,8 @@ def get_creator(data):
                     "name": "Test Affiliation Name"
                 },
                 "email": "affliation@gmail.com",
-                "name": "Test Creator Name",
-                "url": "user's profile link"
+                "name": "Yiqing Qu",  # todo get real username
+                "url": SITE_URL_PREFIX+"/accounts/profile/"
             }
         ]
     }

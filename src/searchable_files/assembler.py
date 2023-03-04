@@ -17,6 +17,13 @@ def _current_user_as_urn():
     return f"urn:globus:auth:identity:{_current_user_as_urn.identity_id}"
 
 
+GROUP_UUID = "d85905ab-b0ec-11ed-9fa3-e76911c8323b"
+def _current_group_as_urn():
+    if not hasattr(_current_group_as_urn, "identity_id"):
+        _current_group_as_urn.group_id = GROUP_UUID
+    return f"urn:globus:groups:id:{_current_group_as_urn.group_id}"
+
+
 def _render_visibility(value, listify=True):
     if isinstance(value, list):
         return [_render_visibility(v, listify=False) for v in value]
@@ -24,7 +31,8 @@ def _render_visibility(value, listify=True):
     ret = value
     if value == "{current_user}":
         ret = _current_user_as_urn()
-
+    elif value == "{current_group}":
+        ret = _current_group_as_urn()
     if isinstance(ret, list):
         return ret
     return [ret]
@@ -46,7 +54,7 @@ def build_entries(datafile, settings):
     with open(datafile) as fp:
         data = json.load(fp)
 
-    full_filename = data["relpath"]
+    full_filename = data["identifier"]
 
     # if there are annotations to add, do so
     for pattern, annotations in settings.file_specific_annotations.items():

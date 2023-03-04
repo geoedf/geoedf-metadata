@@ -5,6 +5,7 @@ import json
 import os
 import re
 import shutil
+import uuid
 
 import click
 import ruamel.yaml
@@ -80,8 +81,8 @@ def get_basic_info(filename, settings):
 def filename2dict(filename, settings):
     print("\n===========\nfilename: " + filename)
     info = os.stat(filename)
-
-    schemaorg_json_obj = metadata2schemaorg(filename, settings)
+    file_uuid = str(uuid.uuid4())
+    schemaorg_json_obj = metadata2schemaorg(filename, file_uuid, settings)
     # schemaorg_json_obj_static = metadata2schemaorg_static(filename, settings)
     return {
         "relpath": filename,
@@ -90,27 +91,23 @@ def filename2dict(filename, settings):
         "tags": file_tags(filename),
         "extension": extension(filename),
         "name": os.path.basename(filename),
-        "identifier": os.path.basename(filename),
+        "identifier": file_uuid,
         "title": os.path.basename(filename),
         "dateCreated": datetime.datetime.fromtimestamp(info.st_mtime).isoformat(),
         "dateModified": datetime.datetime.fromtimestamp(info.st_mtime).isoformat(),
         "description": read_head(filename, settings),
-
-
         "basicInfo": get_basic_info(filename, settings),
-        # "subject": filename,
-
+        "subject": file_uuid,
         # schemaorg json
         "schemaorgJson": schemaorg_json_obj,
-
     }
 
 
-def metadata2schemaorg(filename, settings):
-    rsp = extract_metadata(filename)
-    print(json.dumps(rsp))
+def metadata2schemaorg(filename, file_uuid, settings):
+    metadata = extract_metadata(filename)
+    print(json.dumps(metadata))
 
-    return idata2schemaorg(filename, rsp, settings)
+    return idata2schemaorg(filename, metadata, file_uuid, settings)
 
 
 def target_file(output_directory, filename):
@@ -144,7 +141,7 @@ def _load_settings_callback(ctx, param, value):
 )
 @click.option(
     "--directory",
-    default="data/files",
+    default="data/files/group",
     show_default=True,
     help="A path, relative to the current working directory, "
          "containing data files from which to extract metadata",
@@ -178,10 +175,18 @@ def extract_cli(settings, directory, output, clean):
     os.chdir(directory)
 
     rendered_data = {}
+    # in all_filenames("single_files")
     for filename in all_filenames("."):
         # name, ext = os.path.splitext(filename)
         # print(name + ", " + ext + ".")
+
         rendered_data[filename] = filename2dict(filename, settings)
+
+    # in all_filenames("multiple_files")
+    # generate schemaorg for each file
+    # generate schemaorg for the zip file
+    # add schemaorg of each file to the 'hasPart' field in the schemaorg of the zip file
+
 
     os.chdir(old_cwd)
     for filename, data in rendered_data.items():

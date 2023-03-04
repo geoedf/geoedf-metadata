@@ -33,8 +33,11 @@ file_specific_annotations:
 # (logged in) user's primary ID, formatted as a Principal URN
 # for details on the Principal URN format, see:
 #   https://docs.globus.org/api/search/overview/#principal_urns
+
 visibility:
   default_visibility: public
+#  default_visibility: '{current_group}'
+#  default_visibility: '{current_user}'
   file_restrictions:
     dir1/file1.txt: '{current_user}'
   doc_parts:
