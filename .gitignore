@@ -11,3 +11,6 @@
 # pycharm and macos
 /.idea/
 .DS_Store
+
+# local file path
+/data/files/
