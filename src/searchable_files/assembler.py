@@ -175,3 +175,29 @@ def assemble_cli(settings, directory, output, clean):
 
     click.echo("ingest document assembly complete")
     click.echo(f"results visible in\n  {output}")
+
+SETTING_PATH = "data/config/assembler.yaml"
+def assemble_handler(filename, clean):
+    settings = Settings(yaml.load(open(SETTING_PATH)))
+
+    output = "output/worker/extracted"
+    if clean:
+        shutil.rmtree(output, ignore_errors=True)
+
+    entry_docs = []
+
+    if not filename.endswith(".DS_Store"):
+        entry_docs.extend(build_entries(filename, settings))
+
+    current_doc_id = 0
+    batch = []
+    for entry in entry_docs:
+        if len(batch) >= settings.max_batch_size:
+            flush_batch(batch, current_doc_id, output)
+            batch = []
+            current_doc_id += 1
+        batch.append(entry)
+    flush_batch(batch, current_doc_id, output)
+
+    click.echo("ingest document assembly complete")
+    click.echo(f"results visible in\n  {output}")

@@ -128,6 +128,7 @@ class Settings:
 
 def _load_settings_callback(ctx, param, value):
     if value is not None:
+        print(f'fp = {value}', value)
         with open(value) as fp:
             return Settings(yaml.load(fp))
 
@@ -187,6 +188,31 @@ def extract_cli(settings, directory, output, clean):
     # generate schemaorg for the zip file
     # add schemaorg of each file to the 'hasPart' field in the schemaorg of the zip file
 
+    os.chdir(old_cwd)
+    for filename, data in rendered_data.items():
+        with open(target_file(output, filename), "w") as fp:
+            prettyprint_json(data, fp)
+
+    click.echo("metadata extraction complete")
+    click.echo(f"results visible in\n  {output}")
+
+
+SETTING_PATH = "data/config/extractor.yaml"
+
+
+def extract_handler(filename, clean):
+    settings = Settings(yaml.load(open(SETTING_PATH)))
+    output = "output/worker/extracted/"
+    if clean:
+        shutil.rmtree(output, ignore_errors=True)
+
+    old_cwd = os.getcwd()
+    # os.chdir(directory)
+    print(f"[extract_handler] settings={settings}")
+
+    rendered_data = {}
+    # in all_filenames("single_files")
+    rendered_data[filename] = filename2dict(filename, settings)
 
     os.chdir(old_cwd)
     for filename, data in rendered_data.items():

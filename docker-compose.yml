@@ -1,0 +1,22 @@
+version: '3'
+
+services:
+  worker:
+    build:
+      dockerfile: Dockerfile
+    command: python3 src/get_message.py
+#    env_file:
+#      - db.env
+    volumes:
+      - .:/code
+    ports:
+      - "5673:5673"
+    expose:
+      - 5673
+    depends_on:
+        - rabbitmq-server
+  rabbitmq-server:
+      image: rabbitmq:management
+      ports:
+      - 5672:5672
+      - 15672:15672
