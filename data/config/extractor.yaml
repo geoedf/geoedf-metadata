@@ -1,6 +1,9 @@
 ---
 # Extractor Settings
 
+source_path: "data/files/group"
+output_path: "output/worker_metadata/extracted"
+
 # this data pertains to reading the first N characters of a file and storing it
 # as part of the `head_and_mode` part of a document
 read_head:
@@ -26,3 +29,4 @@ read_head:
   # after that preamble
   skip_preamble_patterns:
     - '\*\*\* START OF THE PROJECT GUTENBERG EBOOK .* \*\*\*\n+'
+

@@ -3,26 +3,42 @@ import json
 import pika
 
 from searchable_files.assembler import assemble_handler
-from searchable_files.extractor import extract_handler
+from searchable_files.constants import RMQ_NAME, INDEX_ID
+from searchable_files.extractor import extract_handler, Settings, yaml, SETTING_PATH
+from searchable_files.submitter import submit_handler
 
 # Establish a connection to RabbitMQ
 connection = pika.BlockingConnection(pika.ConnectionParameters('rabbitmq-server'))
 channel = connection.channel()
 
 # Declare a queue to consume from
-channel.queue_declare(queue='geoedf-all')
+channel.queue_declare(queue=RMQ_NAME)
 
-# Define a callback function to handle received messages
+
 def callback(ch, method, properties, body):
     print(" [x] Received %r" % body.decode())
     msg = json.loads(body.decode())
     print("Received message:", msg)
-    extract_handler(msg['path'], True)
-    assemble_handler("output/worker/extracted/", True)
+
+    extract_settings = Settings(yaml.load(open(SETTING_PATH)))
+
+    # todo better way to do error handling
+    err = extract_handler(msg['uuid'], msg['path'], True, msg['type'])
+    if err is not None:
+        err_msg = "failed at extrator"
+        return err_msg
+    err = assemble_handler(extract_settings.output_path, True)
+    if err is not None:
+        err_msg = "failed at assembler"
+        return err_msg
+    # err = submit_handler("output/worker_metadata/assembled/", "output/worker_metadata/submitted/", INDEX_ID)
+    # if err is not None:
+    #     err_msg = "failed at submitter"
+    #     return err_msg
 
 
 # Consume messages from the queue
-channel.basic_consume(queue='geoedf-all', on_message_callback=callback, auto_ack=True)
+channel.basic_consume(queue=RMQ_NAME, on_message_callback=callback, auto_ack=True)
 
 print('Waiting for messages. To exit press CTRL+C')
 channel.start_consuming()

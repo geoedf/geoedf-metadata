@@ -29,10 +29,10 @@ def _render_visibility(value, listify=True):
         return [_render_visibility(v, listify=False) for v in value]
 
     ret = value
-    if value == "{current_user}":
-        ret = _current_user_as_urn()
-    elif value == "{current_group}":
-        ret = _current_group_as_urn()
+    # if value == "{current_user}":
+    #     ret = _current_user_as_urn()
+    # elif value == "{current_group}":
+    #     ret = _current_group_as_urn()
     if isinstance(ret, list):
         return ret
     return [ret]
@@ -177,17 +177,17 @@ def assemble_cli(settings, directory, output, clean):
     click.echo(f"results visible in\n  {output}")
 
 SETTING_PATH = "data/config/assembler.yaml"
-def assemble_handler(filename, clean):
+def assemble_handler(directory, clean):
     settings = Settings(yaml.load(open(SETTING_PATH)))
 
-    output = "output/worker/extracted"
+    output = "output/worker_metadata/assembled/"
     if clean:
         shutil.rmtree(output, ignore_errors=True)
 
     entry_docs = []
-
-    if not filename.endswith(".DS_Store"):
-        entry_docs.extend(build_entries(filename, settings))
+    for filename in all_filenames(directory):
+        if not filename.endswith(".DS_Store"):
+            entry_docs.extend(build_entries(filename, settings))
 
     current_doc_id = 0
     batch = []
@@ -201,3 +201,4 @@ def assemble_handler(filename, clean):
 
     click.echo("ingest document assembly complete")
     click.echo(f"results visible in\n  {output}")
+    return
