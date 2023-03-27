@@ -7,8 +7,14 @@ from searchable_files.constants import RMQ_NAME, INDEX_ID
 from searchable_files.extractor import extract_handler, Settings, yaml, SETTING_PATH
 from searchable_files.submitter import submit_handler
 
-# Establish a connection to RabbitMQ
-connection = pika.BlockingConnection(pika.ConnectionParameters('rabbitmq-server'))
+# Establish a connection to RabbitMQ rabbitmq-server
+RMQ_USER = 'guest'
+RMQ_PASS = 'guest'
+RMQ_HOST_IP = '172.17.0.3'
+
+credentials = pika.PlainCredentials(RMQ_USER, RMQ_PASS)
+connection = pika.BlockingConnection(
+    pika.ConnectionParameters(host=RMQ_HOST_IP, port=5672, virtual_host='/', credentials=credentials))
 channel = connection.channel()
 
 # Declare a queue to consume from
