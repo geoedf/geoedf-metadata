@@ -37,10 +37,12 @@ def callback(ch, method, properties, body):
     if err is not None:
         err_msg = "failed at assembler"
         return err_msg
-    # err = submit_handler("output/worker_metadata/assembled/", "output/worker_metadata/submitted/", INDEX_ID)
-    # if err is not None:
-    #     err_msg = "failed at submitter"
-    #     return err_msg
+    err = submit_handler("output/worker_metadata/assembled/", "output/worker_metadata/submitted/", INDEX_ID)
+    if err is not None:
+        err_msg = "failed at submitter"
+        print(f'[callback] err_msg={err_msg}')
+        return err_msg
+    print(f'[callback] success in submitter')
 
 
 # Consume messages from the queue

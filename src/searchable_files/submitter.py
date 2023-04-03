@@ -4,6 +4,7 @@ import os
 import click
 
 from .lib import all_filenames, common_options, search_client, token_storage_adapter
+from .lib.search import new_search_client
 
 
 def submit_doc(client, index_id, filename, task_list_file):
@@ -73,7 +74,7 @@ task IDs are visible in
 
 
 def submit_handler(directory, output, index_id):
-    # client = search_client()
+    client = new_search_client()
 
     os.makedirs(output, exist_ok=True)
     task_list_file = os.path.join(output, "tasks.txt")
@@ -100,4 +101,6 @@ ingest document submission (task submission) complete
 task IDs are visible in
     {task_list_file}"""
     )
+    print(f'[callback] err_msg={"!!!"}')
+
     pass
