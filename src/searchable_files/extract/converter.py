@@ -25,7 +25,7 @@ def idata2schemaorg(filename, data, file_uuid, settings):
         "url": f'{RESOURCE_URL_PREFIX}/{file_uuid}',
 
         "@type": "Dataset",
-        "additionalType": "link",
+        # "additionalType": "link",
         "name": os.path.basename(filename),
         "description": f'This publication {os.path.basename(filename)} is a resource in GeoEDF Portal. ',
         # "description": read_head(filename, settings),
@@ -39,13 +39,13 @@ def idata2schemaorg(filename, data, file_uuid, settings):
 
         "creator": creator,
 
-        "temporalCoverage": "2018-05-24/2018-06-24",
+        "temporalCoverage": "2018-05-24/2019-06-24",
 
         "spatialCoverage": spatial_coverage,
 
         "publisher": {
             "@type": "Organization",
-            "name": "Publisher Name"
+            "name": "Purdue University"
         },
 
         "provider": {
