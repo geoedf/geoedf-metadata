@@ -4,6 +4,7 @@ import os
 import click
 
 from .lib import all_filenames, common_options, search_client, token_storage_adapter
+from .lib.search import new_search_client
 
 
 def submit_doc(client, index_id, filename, task_list_file):
@@ -70,3 +71,36 @@ ingest document submission (task submission) complete
 task IDs are visible in
     {task_list_file}"""
     )
+
+
+def submit_handler(directory, output, index_id):
+    client = new_search_client()
+
+    os.makedirs(output, exist_ok=True)
+    task_list_file = os.path.join(output, "tasks.txt")
+    with open(task_list_file, "w"):  # empty the file (open in write mode)
+        pass
+
+    # ./searchable-files extract && ./searchable-files assemble &&
+    # ./searchable-files submit --index-id 76c5e7eb-6cb6-492c-ba80-7e47abff0586 && ./searchable-files watch
+    if not index_id:
+        index_info = token_storage_adapter().read_config("index_info")
+        if index_info is None:
+            raise click.UsageError(
+                "Cannot submit without first setting up "
+                "an index or passing '--index-id'"
+            )
+        index_id = index_info["index_id"]
+
+    # for filename in all_filenames(directory):
+    #     submit_doc(client, index_id, filename, task_list_file)
+
+    click.echo(
+        f"""\
+ingest document submission (task submission) complete
+task IDs are visible in
+    {task_list_file}"""
+    )
+    print(f'[callback] err_msg={"!!!"}')
+
+    pass

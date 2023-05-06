@@ -11,7 +11,7 @@ import click
 import ruamel.yaml
 from identify import identify
 
-from .extract.converter import idata2schemaorg
+from .extract.converter import idata2schemaorg, RESOURCE_URL_PREFIX
 from .extract.extract_metadata import extract_metadata
 from .lib import all_filenames, common_options, prettyprint_json
 
@@ -78,10 +78,11 @@ def get_basic_info(filename, settings):
     }
 
 
-def filename2dict(filename, settings):
+def filename2dict(file_uuid, filename, settings):
     print("\n===========\nfilename: " + filename)
     info = os.stat(filename)
-    file_uuid = str(uuid.uuid4())
+    if file_uuid is None:
+        file_uuid = str(uuid.uuid4())
     schemaorg_json_obj = metadata2schemaorg(filename, file_uuid, settings)
     # schemaorg_json_obj_static = metadata2schemaorg_static(filename, settings)
     return {
@@ -103,6 +104,53 @@ def filename2dict(filename, settings):
     }
 
 
+def multiplefile2dict(file_uuid, path, settings):
+    print("\n===========\npath: " + path)
+
+    if file_uuid is None:
+        file_uuid = str(uuid.uuid4())
+
+    old_cwd = os.getcwd()
+    os.chdir(path)
+
+    rendered_data = {}
+    merged_data = None
+    merged_schemaorg = None
+    merged_has_part = []
+    # in all_filenames("single_files")
+    for filename in all_filenames("."):
+        rendered_data[filename] = filename2dict(file_uuid, filename, settings)
+        if merged_data is None:
+            merged_data = rendered_data[filename]
+        if "schemaorgJson" in merged_data:
+            if merged_schemaorg is None:
+                merged_schemaorg = merged_data['schemaorgJson']
+            merged_has_part.append(get_sub_data(rendered_data[filename]['schemaorgJson']))
+    merged_schemaorg['hasPart'] = merged_has_part
+
+    # pattern = "[^/\\]+[/\\]*$"
+    # name = re.search(pattern, path).
+    name = os.path.basename(path)
+    merged_schemaorg['name'] = name
+    merged_data['schemaorgJson'] = merged_schemaorg
+    merged_data['relpath'] = path
+    merged_data['name'] = name
+    merged_data.pop('size_bytes')
+
+    return merged_data
+
+
+def get_sub_data(schemaorg_data):
+    return {
+        "@type": "Dataset",
+        "name": schemaorg_data['name'],
+        "description": schemaorg_data['description'],
+        "license": schemaorg_data['license'],
+        "creator": schemaorg_data['creator'],
+        "url": RESOURCE_URL_PREFIX,
+    }
+
+
 def metadata2schemaorg(filename, file_uuid, settings):
     metadata = extract_metadata(filename)
     print(json.dumps(metadata))
@@ -119,6 +167,8 @@ def target_file(output_directory, filename):
 class Settings:
     def __init__(self, settingsdict):
         self.read_head = settingsdict.get("read_head", {})
+        self.source_path = settingsdict.get("source_path", {})
+        self.output_path = settingsdict.get("output_path", {})
         if "files" not in self.read_head:
             self.read_head["files"] = []
         self.head_length = int(self.read_head["length"])
@@ -181,7 +231,7 @@ def extract_cli(settings, directory, output, clean):
         # name, ext = os.path.splitext(filename)
         # print(name + ", " + ext + ".")
 
-        rendered_data[filename] = filename2dict(filename, settings)
+        rendered_data[filename] = filename2dict(None, filename, settings)
 
     # in all_filenames("multiple_files")
     # generate schemaorg for each file
@@ -200,9 +250,10 @@ def extract_cli(settings, directory, output, clean):
 SETTING_PATH = "data/config/extractor.yaml"
 
 
-def extract_handler(filename, clean):
+def extract_handler(uuid, path, clean, file_type):
     settings = Settings(yaml.load(open(SETTING_PATH)))
-    output = "output/worker/extracted/"
+    output = settings.output_path
+
     if clean:
         shutil.rmtree(output, ignore_errors=True)
 
@@ -212,7 +263,15 @@ def extract_handler(filename, clean):
 
     rendered_data = {}
     # in all_filenames("single_files")
-    rendered_data[filename] = filename2dict(filename, settings)
+
+    if file_type == "single":
+        rendered_data[path] = filename2dict(uuid, path, settings)
+    elif file_type == "multiple":
+        rendered_data[path] = multiplefile2dict(uuid, path, settings)
+    elif file_type == "list":
+        path_list = path
+        for p in path_list:
+            rendered_data[path] = filename2dict(uuid, p, settings)
 
     os.chdir(old_cwd)
     for filename, data in rendered_data.items():
@@ -221,3 +280,4 @@ def extract_handler(filename, clean):
 
     click.echo("metadata extraction complete")
     click.echo(f"results visible in\n  {output}")
+    return

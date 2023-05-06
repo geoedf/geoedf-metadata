@@ -5,13 +5,17 @@ import uuid
 
 RESOURCE_URL_PREFIX = "https://geoedf-portal.anvilcloud.rcac.purdue.edu/resource"
 SITE_URL_PREFIX = "https://geoedf-portal.anvilcloud.rcac.purdue.edu"
+AFFILIATION_NAME = "Purdue University"
+CREATOR_NAME = "Yiqing Qu"
+CREATOR_EMAIL = "qu112@purdue.edu"
+
 
 def idata2schemaorg(filename, data, file_uuid, settings):
     info = os.stat(filename)
     # print(data)
     spatial_coverage = get_spatial_coverage(data)
     print("spatial_coverage" + str(spatial_coverage))
-    creator = get_creator(data)
+    creator = get_creator(data, AFFILIATION_NAME, CREATOR_NAME, CREATOR_EMAIL)
     identifier = get_identifier_list(data, file_uuid)
 
     schemaorg_json = {
@@ -21,7 +25,7 @@ def idata2schemaorg(filename, data, file_uuid, settings):
         "url": f'{RESOURCE_URL_PREFIX}/{file_uuid}',
 
         "@type": "Dataset",
-        "additionalType": "link",
+        # "additionalType": "link",
         "name": os.path.basename(filename),
         "description": f'This publication {os.path.basename(filename)} is a resource in GeoEDF Portal. ',
         # "description": read_head(filename, settings),
@@ -35,20 +39,20 @@ def idata2schemaorg(filename, data, file_uuid, settings):
 
         "creator": creator,
 
-        "temporalCoverage": "2018-05-24/2018-06-24",
+        "temporalCoverage": "2018-05-24/2019-06-24",
 
         "spatialCoverage": spatial_coverage,
 
         "publisher": {
             "@type": "Organization",
-            "name": "Publisher Name"
+            "name": "Purdue University"
         },
 
         "provider": {
-            "@id": "provider id",
+            "@id": SITE_URL_PREFIX,
             "@type": "Organization",
-            "name": "Yiqing Qu",
-            "url": f'{RESOURCE_URL_PREFIX}/{file_uuid}'
+            "name": "GeoEDF Portal",
+            "url": SITE_URL_PREFIX,
         },
         "includedInDataCatalog": {
             "@type": "DataCatalog",
@@ -102,34 +106,36 @@ def get_spatial_coverage(data):
 
 
 def get_identifier_list(data, file_uuid):
-    if data is None:
-        return None
-    identifier = {
-        "@type": "PropertyValue",  # todo 了解property value
-    }
-    if "identifier" in data:
-        identifier['filename'] = data['identifier']
-    if "id" in data:
-        identifier['@id'] = data['id']
-    if "url" in data:
-        identifier['url'] = f'{RESOURCE_URL_PREFIX}/{file_uuid}'
-    return [identifier]
-
-
-def get_creator(data):
+    return [f'{RESOURCE_URL_PREFIX/uuid}'] # todo check the form of identifier
+    #
     # if data is None:
     #     return None
+    # identifier = {
+    #     "@type": "PropertyValue",  # todo 了解property value
+    # }
+    # if "identifier" in data:
+    #     identifier['filename'] = data['identifier']
+    # if "id" in data:
+    #     identifier['@id'] = data['id']
+    # if "url" in data:
+    #     identifier['url'] = f'{RESOURCE_URL_PREFIX}/{file_uuid}'
+    # return [identifier]
+
+
+def get_creator(data, affiliation, name, email, url):
+    if url is None:
+        url = SITE_URL_PREFIX+"/accounts/profile/"
     return {
         "@list": [
             {
                 "@type": "Person",
                 "affiliation": {
                     "@type": "Organization",
-                    "name": "Test Affiliation Name"
+                    "name": affiliation,
                 },
-                "email": "affliation@gmail.com",
-                "name": "Yiqing Qu",  # todo get real username
-                "url": SITE_URL_PREFIX+"/accounts/profile/"
+                "email": email,
+                "name": name,
+                "url": url,
             }
         ]
     }

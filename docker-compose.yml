@@ -1,22 +1,38 @@
 version: '3'
 
 services:
+  rabbitmq-server:
+    image: rabbitmq:management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    hostname: "rabbitmq-server"
+    container_name: some-rabbit
+    network_mode: bridge
+#    networks:
+#      network:
+#        ipv4_address: 10.5.0.5
   worker:
     build:
       dockerfile: Dockerfile
     command: python3 src/get_message.py
-#    env_file:
-#      - db.env
+    #    env_file:
+    #      - db.env
     volumes:
       - .:/code
     ports:
       - "5673:5673"
     expose:
       - 5673
-    depends_on:
-        - rabbitmq-server
-  rabbitmq-server:
-      image: rabbitmq:management
-      ports:
-      - 5672:5672
-      - 15672:15672
+#    depends_on:
+#      - rabbitmq-server
+    hostname: "rabbitmq-worker"
+    network_mode: bridge
+
+#networks:
+#  network:
+#    driver: bridge
+#    ipam:
+#      config:
+#        - subnet: 10.5.0.0/16
+#          gateway: 10.5.0.1

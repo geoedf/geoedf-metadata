@@ -1,6 +1,7 @@
 import globus_sdk
 
 from .auth import internal_auth_client, token_storage_adapter
+from ..globus_auth import get_authorizer
 
 SEARCH_RESOURCE_SERVER = "search.api.globus.org"
 
@@ -22,5 +23,14 @@ def search_client(authenticated=True):
             int(access_token_expires),
             on_refresh=storage_adapter.on_refresh,
         )
+
+    return globus_sdk.SearchClient(authorizer=authorizer, app_name="searchable-files")
+
+
+GLOBUS_AUTH_SCOPE_INGEST = "urn:globus:auth:scope:search.api.globus.org:ingest"
+
+
+def new_search_client(authenticated=True):
+    authorizer = get_authorizer(GLOBUS_AUTH_SCOPE_INGEST)
 
     return globus_sdk.SearchClient(authorizer=authorizer, app_name="searchable-files")
