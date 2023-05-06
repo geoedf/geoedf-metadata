@@ -268,6 +268,10 @@ def extract_handler(uuid, path, clean, file_type):
         rendered_data[path] = filename2dict(uuid, path, settings)
     elif file_type == "multiple":
         rendered_data[path] = multiplefile2dict(uuid, path, settings)
+    elif file_type == "list":
+        path_list = path
+        for p in path_list:
+            rendered_data[path] = filename2dict(uuid, p, settings)
 
     os.chdir(old_cwd)
     for filename, data in rendered_data.items():
