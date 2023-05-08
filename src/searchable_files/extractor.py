@@ -91,12 +91,12 @@ def filename2dict(file_uuid, filename, settings):
         "head": read_head(filename, settings),
         "tags": file_tags(filename),
         "extension": extension(filename),
-        "name": os.path.basename(filename),
+        "name":  os.path.basename(filename),
         "identifier": file_uuid,
         "title": os.path.basename(filename),
         "dateCreated": datetime.datetime.fromtimestamp(info.st_mtime).isoformat(),
         "dateModified": datetime.datetime.fromtimestamp(info.st_mtime).isoformat(),
-        "description": read_head(filename, settings),
+        "description": f'This publication {os.path.basename(filename)} is a resource in GeoEDF Portal. ',
         "basicInfo": get_basic_info(filename, settings),
         "subject": file_uuid,
         # schemaorg json
@@ -250,7 +250,7 @@ def extract_cli(settings, directory, output, clean):
 SETTING_PATH = "data/config/extractor.yaml"
 
 
-def extract_handler(uuid, path, clean, file_type):
+def extract_handler(uuid, publication_name, path, clean, file_type):
     settings = Settings(yaml.load(open(SETTING_PATH)))
     output = settings.output_path
 
@@ -263,11 +263,10 @@ def extract_handler(uuid, path, clean, file_type):
 
     rendered_data = {}
     # in all_filenames("single_files")
-
     if file_type == "single":
-        rendered_data[path] = filename2dict(uuid, path, settings)
+        rendered_data[path] = filename2dict(uuid,  path, settings, )
     elif file_type == "multiple":
-        rendered_data[path] = multiplefile2dict(uuid, path, settings)
+        rendered_data[path] = multiplefile2dict(uuid, path, settings,publication_name,)
     elif file_type == "list":
         path_list = path
         for p in path_list:

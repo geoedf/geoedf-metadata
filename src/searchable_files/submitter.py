@@ -5,12 +5,33 @@ import click
 
 from .lib import all_filenames, common_options, search_client, token_storage_adapter
 from .lib.search import new_search_client
+import ruamel.yaml
+
+
+class Settings:
+    def __init__(self, data):
+        self.output_path = data.get("output_path", "output/submitted")
+
+
+SETTING_PATH = "data/config/submitter.yaml"
+
+
+yaml = ruamel.yaml.YAML(typ="safe")
+
+def _load_settings_callback(ctx, param, value):
+    if value is not None:
+        print(f'fp = {value}', value)
+        with open(value) as fp:
+            return Settings(yaml.load(fp))
+
 
 
 def submit_doc(client, index_id, filename, task_list_file):
     with open(filename) as fp:
         data = json.load(fp)
     res = client.ingest(index_id, data)
+    print("res:\n")
+    print(res)
     with open(task_list_file, "a") as fp:
         fp.write(res["task_id"] + "\n")
 
@@ -73,10 +94,13 @@ task IDs are visible in
     )
 
 
-def submit_handler(directory, output, index_id):
+def submit_handler(directory, index_id):
     client = new_search_client()
 
+    settings = Settings(yaml.load(open(SETTING_PATH)))
+    output = settings.output_path
     os.makedirs(output, exist_ok=True)
+
     task_list_file = os.path.join(output, "tasks.txt")
     with open(task_list_file, "w"):  # empty the file (open in write mode)
         pass

@@ -1,7 +1,7 @@
 install: .venv
 	/Users/butterkeks/anaconda3/envs/globus_index/bin/python setup.py -q develop
-	rm -f searchable-files
-	ln -s "/Users/butterkeks/anaconda3/envs/globus_index/bin/searchable-files" searchable-files
+	rm -f geoedf-metadata
+	ln -s "/Users/butterkeks/anaconda3/envs/globus_index/bin/searchable-files" geoedf-metadata
 
 lint:
 	pre-commit run -a

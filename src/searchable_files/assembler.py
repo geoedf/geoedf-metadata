@@ -104,6 +104,8 @@ def flush_batch(entry_batch, docid, output_directory):
 class Settings:
     def __init__(self, data):
         self.max_batch_size = data.get("max_batch_size", 100)
+        self.source_path = data.get("source_path", "output/extracted")
+        self.output_path = data.get("output_path", "output/assembled")
         self.file_specific_annotations = data.get("file_specific_annotations", {})
 
         self.visibility = data.get("visibility")
@@ -176,11 +178,14 @@ def assemble_cli(settings, directory, output, clean):
     click.echo("ingest document assembly complete")
     click.echo(f"results visible in\n  {output}")
 
+
 SETTING_PATH = "data/config/assembler.yaml"
+
+
 def assemble_handler(directory, clean):
     settings = Settings(yaml.load(open(SETTING_PATH)))
 
-    output = "output/worker_metadata/assembled/"
+    output = settings.output_path
     if clean:
         shutil.rmtree(output, ignore_errors=True)
 

@@ -1,7 +1,7 @@
 ---
 # Extractor Settings
 
-source_path: "data/files/group"
+#source_path: "data/files/group"
 output_path: "output/worker_metadata/extracted"
 
 # this data pertains to reading the first N characters of a file and storing it

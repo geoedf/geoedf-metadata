@@ -5,6 +5,12 @@
 # combined into a single ingest document
 max_batch_size: 10
 
+# the source path of the assembler
+source_path: "output/worker_metadata/extracted"
+
+# the output path of the assembler
+output_path: "output/worker_metadata/assembled"
+
 # annotations which are added to specific files (there are no defaults for
 # these values)
 file_specific_annotations:
@@ -42,5 +48,6 @@ visibility:
     dir1/file1.txt: '{current_user}'
   doc_parts:
     - id: head_and_mode
-      visibility: '{current_user}'
+      visibility: '{public}'
+#      visibility: '{current_user}'
       fields: ['head', 'mode']

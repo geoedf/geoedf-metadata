@@ -15,7 +15,7 @@ def idata2schemaorg(filename, data, file_uuid, settings):
     # print(data)
     spatial_coverage = get_spatial_coverage(data)
     print("spatial_coverage" + str(spatial_coverage))
-    creator = get_creator(data, AFFILIATION_NAME, CREATOR_NAME, CREATOR_EMAIL)
+    creator = get_creator(data, AFFILIATION_NAME, CREATOR_NAME, CREATOR_EMAIL, None)
     identifier = get_identifier_list(data, file_uuid)
 
     schemaorg_json = {
@@ -106,7 +106,7 @@ def get_spatial_coverage(data):
 
 
 def get_identifier_list(data, file_uuid):
-    return [f'{RESOURCE_URL_PREFIX/uuid}'] # todo check the form of identifier
+    return [f'{RESOURCE_URL_PREFIX}/{file_uuid}'] # todo check the form of identifier
     #
     # if data is None:
     #     return None
