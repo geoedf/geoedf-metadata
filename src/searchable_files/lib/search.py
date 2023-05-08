@@ -14,6 +14,7 @@ def search_client(authenticated=True):
     if authenticated:
         authdata = as_dict[SEARCH_RESOURCE_SERVER]
         access_token = authdata["access_token"]
+        print(f'[search_client] access_token={access_token}')
         refresh_token = authdata["refresh_token"]
         access_token_expires = authdata["expires_at_seconds"]
         authorizer = globus_sdk.RefreshTokenAuthorizer(

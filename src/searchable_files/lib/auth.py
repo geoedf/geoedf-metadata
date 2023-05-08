@@ -31,6 +31,7 @@ def auth_client():
 
     authdata = as_dict[AUTH_RESOURCE_SERVER]
     access_token = authdata["access_token"]
+    print(f'[auth_client] access_token={access_token}')
     refresh_token = authdata["refresh_token"]
     access_token_expires = authdata["expires_at_seconds"]
 

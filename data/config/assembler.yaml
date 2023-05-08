@@ -48,6 +48,6 @@ visibility:
     dir1/file1.txt: '{current_user}'
   doc_parts:
     - id: head_and_mode
-      visibility: '{public}'
+      visibility: 'public'
 #      visibility: '{current_user}'
       fields: ['head', 'mode']

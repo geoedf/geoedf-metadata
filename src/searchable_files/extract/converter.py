@@ -106,20 +106,20 @@ def get_spatial_coverage(data):
 
 
 def get_identifier_list(data, file_uuid):
-    return [f'{RESOURCE_URL_PREFIX}/{file_uuid}'] # todo check the form of identifier
-    #
-    # if data is None:
-    #     return None
-    # identifier = {
-    #     "@type": "PropertyValue",  # todo 了解property value
-    # }
-    # if "identifier" in data:
-    #     identifier['filename'] = data['identifier']
-    # if "id" in data:
-    #     identifier['@id'] = data['id']
-    # if "url" in data:
-    #     identifier['url'] = f'{RESOURCE_URL_PREFIX}/{file_uuid}'
-    # return [identifier]
+    # return [f'{RESOURCE_URL_PREFIX}/{file_uuid}'] # todo check the form of identifier
+
+    if data is None:
+        return None
+    identifier = {
+        "@type": "PropertyValue",
+    }
+    if "identifier" in data:
+        identifier['filename'] = data['identifier']
+    if "id" in data:
+        identifier['@id'] = data['id']
+    if "url" in data:
+        identifier['url'] = f'{RESOURCE_URL_PREFIX}/{file_uuid}'
+    return [identifier]
 
 
 def get_creator(data, affiliation, name, email, url):

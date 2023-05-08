@@ -63,19 +63,25 @@ def read_head(filename, settings):
     return data[: settings.head_length]
 
 
-def get_basic_info(filename, settings):
+def get_basic_info(filename, settings, uuid):
     info = os.stat(filename)
 
     return {
         "tags": file_tags(filename),
         "extension": extension(filename),
         "name": os.path.basename(filename),
-        "identifier": os.path.basename(filename),
+        "identifier": uuid,
         "title": os.path.basename(filename),
         "dateCreated": datetime.datetime.fromtimestamp(info.st_mtime).isoformat(),
         "dateModified": datetime.datetime.fromtimestamp(info.st_mtime).isoformat(),
-        "description": read_head(filename, settings),
+        "description": get_description(filename, settings),
     }
+
+
+def get_description(filename, settings):
+    if read_head(filename, settings) is None:
+        return f'This publication {os.path.basename(filename)} is a resource in GeoEDF Portal. '
+    return read_head(filename, settings)
 
 
 def filename2dict(file_uuid, filename, settings):
@@ -91,13 +97,13 @@ def filename2dict(file_uuid, filename, settings):
         "head": read_head(filename, settings),
         "tags": file_tags(filename),
         "extension": extension(filename),
-        "name":  os.path.basename(filename),
+        "name": os.path.basename(filename),
         "identifier": file_uuid,
         "title": os.path.basename(filename),
         "dateCreated": datetime.datetime.fromtimestamp(info.st_mtime).isoformat(),
         "dateModified": datetime.datetime.fromtimestamp(info.st_mtime).isoformat(),
-        "description": f'This publication {os.path.basename(filename)} is a resource in GeoEDF Portal. ',
-        "basicInfo": get_basic_info(filename, settings),
+        "description": get_description(filename, settings),
+        "basicInfo": get_basic_info(filename, settings, file_uuid),
         "subject": file_uuid,
         # schemaorg json
         "schemaorgJson": schemaorg_json_obj,
@@ -264,7 +270,7 @@ def extract_handler(uuid, publication_name, path, clean, file_type):
     rendered_data = {}
     # in all_filenames("single_files")
     if file_type == "single":
-        rendered_data[path] = filename2dict(uuid,  path, settings, )
+        rendered_data[path] = filename2dict(uuid, path, settings, )
     elif file_type == "multiple":
         rendered_data[path] = multiplefile2dict(uuid, path, settings,publication_name,)
     elif file_type == "list":
