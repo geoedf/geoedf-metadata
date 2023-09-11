@@ -198,7 +198,7 @@ def _load_settings_callback(ctx, param, value):
 )
 @click.option(
     "--directory",
-    default="data/files/group",
+    default="data/files/single_file",
     show_default=True,
     help="A path, relative to the current working directory, "
          "containing data files from which to extract metadata",
@@ -218,13 +218,14 @@ def _load_settings_callback(ctx, param, value):
 )
 @click.option(
     "--settings",
-    default="data/config/extractor.yaml",
+    default="data/config.yaml/extractor.yaml",
     show_default=True,
     callback=_load_settings_callback,
     help="YAML file with configuration for the extractor",
 )
 @common_options
 def extract_cli(settings, directory, output, clean):
+    clean = True
     if clean:
         shutil.rmtree(output, ignore_errors=True)
 
@@ -253,7 +254,7 @@ def extract_cli(settings, directory, output, clean):
     click.echo(f"results visible in\n  {output}")
 
 
-SETTING_PATH = "data/config/extractor.yaml"
+SETTING_PATH = "data/config.yaml/extractor.yaml"
 
 
 def extract_handler(uuid, publication_name, path, clean, file_type):
@@ -272,7 +273,7 @@ def extract_handler(uuid, publication_name, path, clean, file_type):
     if file_type == "single":
         rendered_data[path] = filename2dict(uuid, path, settings, )
     elif file_type == "multiple":
-        rendered_data[path] = multiplefile2dict(uuid, path, settings,publication_name,)
+        rendered_data[path] = multiplefile2dict(uuid, path, settings, publication_name,)
     elif file_type == "list":
         path_list = path
         for p in path_list:

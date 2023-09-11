@@ -106,7 +106,7 @@ def get_spatial_coverage(data):
 
 
 def get_identifier_list(data, file_uuid):
-    # return [f'{RESOURCE_URL_PREFIX}/{file_uuid}'] # todo check the form of identifier
+    # return [f'{RESOURCE_URL_PREFIX}/{file_uuid}']  # todo check the form of identifier
 
     if data is None:
         return None

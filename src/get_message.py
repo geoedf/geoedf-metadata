@@ -1,4 +1,5 @@
 import json
+import os
 
 import pika
 
@@ -13,13 +14,15 @@ RMQ_USER = 'guest'
 RMQ_PASS = 'guest'
 RMQ_HOST_IP = '172.17.0.2'
 
-credentials = pika.PlainCredentials(RMQ_USER, RMQ_PASS)
-connection = pika.BlockingConnection(
-    pika.ConnectionParameters(host=RMQ_HOST_IP, port=5672, virtual_host='/', credentials=credentials))
-channel = connection.channel()
+def get_channel():
+    credentials = pika.PlainCredentials(RMQ_USER, RMQ_PASS)
+    connection = pika.BlockingConnection(
+        pika.ConnectionParameters(host=RMQ_HOST_IP, port=5672, virtual_host='/', credentials=credentials))
+    channel = connection.channel()
 
-# Declare a queue to consume from
-channel.queue_declare(queue=RMQ_NAME)
+    # Declare a queue to consume from
+    channel.queue_declare(queue=RMQ_NAME)
+    return channel
 
 
 def callback(ch, method, properties, body):
@@ -50,8 +53,10 @@ def callback(ch, method, properties, body):
     print(f'[callback] success in submitter')
 
 
-# Consume messages from the queue
-channel.basic_consume(queue=RMQ_NAME, on_message_callback=callback, auto_ack=True)
+def consume_msg():
+    with get_channel() as channel:
+        # Consume messages from the queue
+        channel.basic_consume(queue=RMQ_NAME, on_message_callback=callback, auto_ack=True)
 
-print('Waiting for messages. To exit press CTRL+C')
-channel.start_consuming()
+        print('Waiting for messages. To exit press CTRL+C')
+        channel.start_consuming()

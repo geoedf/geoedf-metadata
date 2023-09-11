@@ -27,7 +27,7 @@ jobs:
           file: ./Dockerfile
           platforms: linux/amd64
           push: true
-          tags: registry.anvil.rcac.purdue.edu/geoedf/geoedf-metadata_worker:${{ github.run_number }}
+          tags: registry.anvil.rcac.purdue.edu/geoedf/geoedf-metadata:${{ github.run_number }}
           secrets: |
             "github_token=${{ secrets.GITHUB_TOKEN }}"
 
