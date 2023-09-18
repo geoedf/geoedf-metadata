@@ -1,21 +1,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: worker
+  name: metadata-worker
   namespace: geoedf
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: worker
+      app: metadata-worker
   template:
     metadata:
       labels:
-        app: worker
+        app: metadata-worker
     spec:
       containers:
       - name: worker
-        image: registry.anvil.rcac.purdue.edu/geoedf/geoedf-metadata:5
+        image: registry.anvil.rcac.purdue.edu/geoedf/geoedf-metadata:6
         ports:
         - containerPort: 5673
       imagePullSecrets:

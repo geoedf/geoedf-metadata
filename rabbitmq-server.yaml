@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: rabbitmq-server
-        image: registry.anvil.rcac.purdue.edu/geoedf/geoedf-metadata:5
+        image: registry.anvil.rcac.purdue.edu/geoedf/geoedf-metadata:6
         ports:
         - containerPort: 5672
       imagePullSecrets:
