@@ -7,7 +7,7 @@ services:
       - "5672:5672"
       - "15672:15672"
     hostname: "rabbitmq-server"
-    container_name: some-rabbit
+    container_name: rabbitmq-server
     network_mode: bridge
 #    networks:
 #      network:

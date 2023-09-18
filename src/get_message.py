@@ -12,13 +12,13 @@ from searchable_files.submitter import submit_handler
 # Establish a connection to RabbitMQ rabbitmq-server
 RMQ_USER = 'guest'
 RMQ_PASS = 'guest'
-RMQ_HOST_IP = '172.17.0.2'
+RMQ_HOST_IP = '172.17.0.3'
 RMQ_SERVICE_NAME = 'rabbitmq-service'
 
 def get_channel():
     credentials = pika.PlainCredentials(RMQ_USER, RMQ_PASS)
     connection = pika.BlockingConnection(
-        pika.ConnectionParameters(host=RMQ_SERVICE_NAME, port=5672, virtual_host='/', credentials=credentials))
+        pika.ConnectionParameters(host=RMQ_HOST_IP, port=5672, virtual_host='/', credentials=credentials))
     channel = connection.channel()
 
     # Declare a queue to consume from
@@ -61,3 +61,6 @@ def consume_msg():
 
         print('Waiting for messages. To exit press CTRL+C')
         channel.start_consuming()
+
+
+consume_msg()

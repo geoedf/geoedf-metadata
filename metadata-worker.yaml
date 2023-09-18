@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: worker
+  namespace: geoedf
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: worker
+  template:
+    metadata:
+      labels:
+        app: worker
+    spec:
+      containers:
+      - name: worker
+        image: registry.anvil.rcac.purdue.edu/geoedf/geoedf-metadata:5
+        ports:
+        - containerPort: 5673
+      imagePullSecrets:
+      - name: qyq-geoedf
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: worker-service
+  namespace: geoedf
+spec:
+  selector:
+    app: worker
+  ports:
+    - protocol: TCP
+      port: 5673
+      targetPort: 5673

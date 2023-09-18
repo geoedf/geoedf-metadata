@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rabbitmq-server
+  namespace: geoedf
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rabbitmq-server
+  template:
+    metadata:
+      labels:
+        app: rabbitmq-server
+    spec:
+      containers:
+      - name: rabbitmq-server
+        image: registry.anvil.rcac.purdue.edu/geoedf/geoedf-metadata:5
+        ports:
+        - containerPort: 5672
+      imagePullSecrets:
+      - name: qyq-geoedf
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rabbitmq-service
+  namespace: geoedf
+spec:
+  selector:
+    app: rabbitmq-server
+  ports:
+    - protocol: TCP
+      port: 5672
+      targetPort: 5672
