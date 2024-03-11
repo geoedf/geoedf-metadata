@@ -179,7 +179,7 @@ def assemble_cli(settings, directory, output, clean):
     click.echo(f"results visible in\n  {output}")
 
 
-SETTING_PATH = "data/config.yaml/assembler.yaml"
+SETTING_PATH = "data/config/assembler.yaml"
 
 
 def assemble_handler(directory, clean):

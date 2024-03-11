@@ -1,7 +1,9 @@
 import json
 import os
+import sys
 
 import pika
+from pika.exceptions import AMQPConnectionError
 
 from searchable_files import extractor, assembler, submitter
 from searchable_files.assembler import assemble_handler
@@ -12,11 +14,15 @@ from searchable_files.submitter import submit_handler
 # Establish a connection to RabbitMQ rabbitmq-server
 RMQ_USER = 'guest'
 RMQ_PASS = 'guest'
-RMQ_HOST_IP = '172.17.0.2'
+RMQ_HOST_IP = '172.17.0.3'
 RMQ_SERVICE_NAME = 'rabbitmq-service'
+
 
 def get_channel():
     credentials = pika.PlainCredentials(RMQ_USER, RMQ_PASS)
+    # local test
+    # connection = pika.BlockingConnection(
+    #     pika.ConnectionParameters(host=RMQ_HOST_IP, port=5672, virtual_host='/', credentials=credentials))
     connection = pika.BlockingConnection(
         pika.ConnectionParameters(host=RMQ_SERVICE_NAME, port=5672, virtual_host='/', credentials=credentials))
     channel = connection.channel()
@@ -36,7 +42,8 @@ def callback(ch, method, properties, body):
     submit_settings = submitter.Settings(yaml.load(open(submitter.SETTING_PATH)))
 
     # todo better way to do error handling
-    err = extract_handler(msg['uuid'], msg['publication_name'], msg['path'], True, msg['type'])
+    err = extract_handler(msg['uuid'], msg['publication_name'], msg['path'], True, msg['type'], msg['description'],
+                          msg['keywords'])
     if err is not None:
         err_msg = "failed at extrator"
         return err_msg
@@ -44,6 +51,8 @@ def callback(ch, method, properties, body):
     if err is not None:
         err_msg = "failed at assembler"
         return err_msg
+
+    print(f'[callback] {assemble_settings.output_path}')
     err = submit_handler(assemble_settings.output_path, INDEX_ID)
     if err is not None:
         err_msg = "failed at submitter"
@@ -55,12 +64,24 @@ def callback(ch, method, properties, body):
 
 
 def consume_msg():
-    with get_channel() as channel:
-        # Consume messages from the queue
-        channel.basic_consume(queue=RMQ_NAME, on_message_callback=callback, auto_ack=True)
+    try:
+        with get_channel() as channel:
+            channel.basic_consume(queue=RMQ_NAME, on_message_callback=callback, auto_ack=True)
 
-        print('Waiting for messages. To exit press CTRL+C')
-        channel.start_consuming()
+            print(' [*] Waiting for messages. To exit press CTRL+C')
+            channel.start_consuming()
+    except KeyboardInterrupt:
+        print(' [*] Interrupted')
+        try:
+            sys.exit(0)
+        except SystemExit:
+            os._exit(0)
+    except AMQPConnectionError:
+        print("Connection to RabbitMQ lost. Retrying...")
+        # Optionally add a retry mechanism here
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
 
 
-consume_msg()
+if __name__ == "__main__":
+    consume_msg()

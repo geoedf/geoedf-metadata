@@ -110,7 +110,7 @@ def filename2dict(file_uuid, filename, settings):
     }
 
 
-def multiplefile2dict(file_uuid, path, settings):
+def multiplefile2dict(file_uuid, path, settings, publication_name, description, keywords, creator):
     print("\n===========\npath: " + path)
 
     if file_uuid is None:
@@ -138,6 +138,19 @@ def multiplefile2dict(file_uuid, path, settings):
     # name = re.search(pattern, path).
     name = os.path.basename(path)
     merged_schemaorg['name'] = name
+    if publication_name is not None:
+        merged_schemaorg['name'] = publication_name
+        merged_data['title'] = publication_name
+        merged_data['basicInfo']['title'] = publication_name
+
+    if description is not None:
+        merged_schemaorg['description'] = description
+        merged_data['description'] = description
+        merged_data['basicInfo']['description'] = description
+
+    if keywords is not None:
+        merged_schemaorg['keywords'] = keywords
+
     merged_data['schemaorgJson'] = merged_schemaorg
     merged_data['relpath'] = path
     merged_data['name'] = name
@@ -254,10 +267,10 @@ def extract_cli(settings, directory, output, clean):
     click.echo(f"results visible in\n  {output}")
 
 
-SETTING_PATH = "data/config.yaml/extractor.yaml"
+SETTING_PATH = "data/config/extractor.yaml"
 
 
-def extract_handler(uuid, publication_name, path, clean, file_type):
+def extract_handler(uuid, publication_name, path, clean, file_type, description, keywords):
     settings = Settings(yaml.load(open(SETTING_PATH)))
     output = settings.output_path
 
@@ -273,7 +286,8 @@ def extract_handler(uuid, publication_name, path, clean, file_type):
     if file_type == "single":
         rendered_data[path] = filename2dict(uuid, path, settings, )
     elif file_type == "multiple":
-        rendered_data[path] = multiplefile2dict(uuid, path, settings, publication_name,)
+        rendered_data[path] = multiplefile2dict(uuid, path, settings, publication_name, description, keywords, None)
+        # todo creator
     elif file_type == "list":
         path_list = path
         for p in path_list:

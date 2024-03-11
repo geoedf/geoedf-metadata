@@ -14,8 +14,8 @@ spec:
         app: metadata-worker
     spec:
       containers:
-      - name: worker
-        image: registry.anvil.rcac.purdue.edu/geoedf/geoedf-metadata:6
+      - name: metadata-worker
+        image: registry.anvil.rcac.purdue.edu/geoedf/geoedf-metadata:7
         ports:
         - containerPort: 5673
       imagePullSecrets:
@@ -28,7 +28,7 @@ metadata:
   namespace: geoedf
 spec:
   selector:
-    app: worker
+    app: metadata-worker
   ports:
     - protocol: TCP
       port: 5673

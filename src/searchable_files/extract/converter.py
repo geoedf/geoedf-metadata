@@ -76,6 +76,19 @@ def idata2schemaorg(filename, data, file_uuid, settings):
             "url": f'{RESOURCE_URL_PREFIX}/{file_uuid}',
             "encodingFormat": "application/rdf+xml"
         },
+        "distribution": {
+            "@type": "DataDownload",
+            "contentSize": "91.8 MB",
+            "encodingFormat": "application/zip",
+            "contentUrl": "https://www.hydroshare.org/hsapi/resource/645bcfee68cd4edbb19883cde0c7597c/",
+            "description": "Zipped BagIt Bag containing the HydroShare Resource",
+            "dateModified": "2024-01-20T10:53:59.988793+00:00",
+
+            "identifier": [
+                "https://www.hydroshare.org/resource/645bcfee68cd4edbb19883cde0c7597c"
+            ]
+
+        }
     }
 
     return schemaorg_json
@@ -114,7 +127,7 @@ def get_identifier_list(data, file_uuid):
         "@type": "PropertyValue",
     }
     if "identifier" in data:
-        identifier['filename'] = data['identifier']
+        identifier['name'] = data['identifier']  # want to test if `filename` is the wrong key name
     if "id" in data:
         identifier['@id'] = data['id']
     if "url" in data:

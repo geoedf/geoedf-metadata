@@ -14,12 +14,13 @@ spec:
         app: rabbitmq-server
     spec:
       containers:
-      - name: rabbitmq-server
-        image: registry.anvil.rcac.purdue.edu/geoedf/geoedf-metadata:6
-        ports:
-        - containerPort: 5672
+        - name: rabbitmq-server
+          image: registry.anvil.rcac.purdue.edu/docker-hub-cache/rabbitmq:management
+          ports:
+            - containerPort: 5672
+            - containerPort: 15672
       imagePullSecrets:
-      - name: qyq-geoedf
+        - name: qyq-geoedf
 ---
 apiVersion: v1
 kind: Service
@@ -33,3 +34,8 @@ spec:
     - protocol: TCP
       port: 5672
       targetPort: 5672
+      name: amqp
+    - protocol: TCP
+      port: 15672
+      targetPort: 15672
+      name: management

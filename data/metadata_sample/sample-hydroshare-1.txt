@@ -1,0 +1,83 @@
+{
+    "@context": "https://schema.org",
+
+    "@id": "https://www.hydroshare.org/resource/ab4fce9c3ee84675b4179c995a60a811#schemaorg",
+    "url": "https://www.hydroshare.org/resource/ab4fce9c3ee84675b4179c995a60a811",
+
+    "@type": "Dataset",
+    "additionalType": "http://www.hydroshare.org/terms/CompositeResource",
+    "name": "Cross Country Ski Trips from Garmin - February 2015",
+    "description": "Cross country skiing trips from 6\u002D9 February, 2015 from Czechia, downloaded using the Garmin Connect (connect.garmin.com/explore) API. I used the category \u0022cross country skiing\u0022 to retrieve a total of 150 gpx routes. The routes were converted from the .gpx format to a line shapefile (.shp). Each feature represents one trip with information about trip start time and trip end time. The projection of the shapefile is WGS1984.",
+    "keywords": ["cross-country skiing", "snow", "crowdsourcing", "garmin", "shapefile"],
+
+    "creativeWorkStatus": "Public",
+
+    "inLanguage": "en-US",
+
+    "identifier": [
+      "https://www.hydroshare.org/resource/ab4fce9c3ee84675b4179c995a60a811"
+    ],
+
+    "creator": {
+      "@list": [
+            {
+                  "@type": "Person",
+                  "email": "jirikadlec2@gmail.com",
+                  "name": "Jiri Kadlec",
+                  "url": "https://www.hydroshare.org/user/56/"
+            }
+      ]
+    },
+
+
+
+
+
+
+    "provider": {
+        "@id": "https://www.hydroshare.org",
+        "@type": "Organization",
+        "name": "HydroShare",
+        "url": "https://www.hydroshare.org"
+    },
+    "includedInDataCatalog": {
+		"@type": "DataCatalog",
+		"name": "HydroShare",
+    	"url": "https://www.hydroshare.org/search/"
+	},
+
+	"license": {
+	    "@type": "CreativeWork",
+
+        "text": "This resource is shared under the Creative Commons Attribution CC BY.",
+        "url": "http://creativecommons.org/licenses/by/4.0/"
+
+	},
+
+     "isAccessibleForFree": true,
+
+
+    "dateCreated": "2015-10-14T18:27:45.273004+00:00",
+    "dateModified": "2015-10-14T18:31:21.724193+00:00",
+
+    "subjectOf": {
+        "@type": "DataDownload",
+        "name": "resourcemetadata.xml",
+        "description": "Dublin Core Metadata Document Describing the Dataset",
+        "url": "https://www.hydroshare.org/hsapi/resource/ab4fce9c3ee84675b4179c995a60a811/scimeta/",
+        "encodingFormat": "application/rdf+xml"
+    },
+    "distribution": {
+        "@type": "DataDownload",
+        "contentSize": "5.1MB",
+        "encodingFormat": "application/zip",
+        "contentUrl": "https://www.hydroshare.org/hsapi/resource/ab4fce9c3ee84675b4179c995a60a811/",
+        "description": "Zipped BagIt Bag containing the HydroShare Resource",
+        "dateModified": "2015-10-14T18:31:21.724193+00:00",
+
+        "identifier": [
+          "https://www.hydroshare.org/resource/ab4fce9c3ee84675b4179c995a60a811"
+        ]
+
+    }
+}

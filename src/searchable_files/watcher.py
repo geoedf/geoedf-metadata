@@ -3,6 +3,7 @@ import time
 import click
 
 from .lib import common_options, search_client
+from .lib.search import app_search_client
 
 
 def wait(client, task_id, max_wait):
@@ -65,6 +66,37 @@ def watch_cli(task_id_file, output, max_wait, delay):
     with click.progressbar(task_ids) as bar:
         for task_id in bar:
             results.append(wait(client, task_id, max_wait))
+            if delay is not None:
+                time.sleep(delay)
+
+    n = len(results)
+    if all(results):
+        click.echo(f"Tasks all completed successfully ({n}/{n})")
+    else:
+        num_success = len([x for x in results if x])
+        num_fail = n - num_success
+        click.echo(f"{num_success} tasks completed successfully ({num_success}/{n})")
+        click.echo(f"{num_fail} tasks failed or did not complete ({num_fail}/{n})")
+
+
+def watcher_handler(task_id_file):
+    client = app_search_client()
+    max_wait = 100
+    delay = True
+
+    task_ids = set()
+    with open(task_id_file) as fp:
+        for line in fp:
+            line = line.strip()
+            if line:  # skip empty
+                task_ids.add(line.strip())
+
+    results = []
+    results_detail = []
+    with click.progressbar(task_ids) as bar:
+        for task_id in bar:
+            results.append(wait(client, task_id, max_wait))
+            results_detail.append(client.get_task(task_id))
             if delay is not None:
                 time.sleep(delay)
 

@@ -2,8 +2,8 @@ from setuptools import find_packages, setup
 
 REQUIREMENTS = [
     "click<8",
-    "globus-sdk<3",
-    "globus-sdk-tokenstorage==0.4.0",
+    "globus-sdk>2",
+    # "globus-sdk-tokenstorage==0.4.0",
     "ruamel.yaml==0.17.4",
     "identify<2.0",
 ]

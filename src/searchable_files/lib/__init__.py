@@ -18,7 +18,7 @@ def all_filenames(directory):
     for dirpath, _dirnames, filenames in os.walk(directory):
         for f in filenames:
             if not f.endswith(".DS_Store"):
-                yield os.path.relpath(os.path.join(dirpath, f))
+                yield os.path.relpath(os.path.join(dirpath, f)) # not sure why it uses yield previously
 
 
 def prettyprint_json(obj, fp=None):

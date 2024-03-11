@@ -1,19 +1,20 @@
 import json
 import os
+from pathlib import Path
 
 import click
 
 from .lib import all_filenames, common_options, search_client, token_storage_adapter
-from .lib.search import new_search_client
+from .lib.search import app_search_client
 import ruamel.yaml
 
 
 class Settings:
-    def __init__(self, data):
-        self.output_path = data.get("output_path", "output/submitted")
+    def __init__(self, settingsdict):
+        self.output_path = settingsdict.get("output_path", "output/submitted")
 
 
-SETTING_PATH = "data/config.yaml/submitter.yaml"
+SETTING_PATH = "data/config/submitter.yaml"
 
 yaml = ruamel.yaml.YAML(typ="safe")
 
@@ -94,8 +95,9 @@ task IDs are visible in
 
 
 def submit_handler(directory, index_id):
-    client = search_client()
-
+    # initialize client if none
+    # client = search_client()
+    client = app_search_client()
     settings = Settings(yaml.load(open(SETTING_PATH)))
     output = settings.output_path
     os.makedirs(output, exist_ok=True)
@@ -115,7 +117,10 @@ def submit_handler(directory, index_id):
             )
         index_id = index_info["index_id"]
 
+    print(os.getcwd())
+    files = all_filenames(directory)
     for filename in all_filenames(directory):
+        print(filename)
         submit_doc(client, index_id, filename, task_list_file)
 
     click.echo(
@@ -124,6 +129,6 @@ ingest document submission (task submission) complete
 task IDs are visible in
     {task_list_file}"""
     )
-    print(f'[callback] err_msg={"!!!"}')
+    # print(f'[callback] err_msg={"!!!"}')
 
     pass

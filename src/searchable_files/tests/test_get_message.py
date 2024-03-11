@@ -11,12 +11,30 @@ class Test(TestCase):
         project_dir = os.path.abspath(os.path.join(os.getcwd(), '../../..'))
         os.chdir(project_dir)
 
+        # Publish from local
+        # mock_msg = {
+        #     "uuid": str(uuid.uuid4()),
+        #     "publication_name": "gds_test_shp",
+        #     "path": "data/files/public/idata_files/AT15-51.shp",
+        #     "type": "single"
+        # }
         mock_msg = {
-          "uuid": str(uuid.uuid4()),
-          "publication_name": "AT15-51.dbf",
-          "path": "data/files/public/idata_files/AT15-51.dbf",
-          "type": "single"
+            "uuid": str(uuid.uuid4()),
+            "publication_name": "gds_test_shp",
+            "path": "data/files/Riv2",
+            # "path": "staging/20240311085013",
+            "type": "multiple",
+            "description": "This is the description of a resource published from GeoEDF Publish Wizard. (Test)",
+            "keywords": ["111", "222"],  # todo
+            "publication_type": "Geospatial Files",
         }
+        # mock_msg = {
+        #   "uuid": str(uuid.uuid4()),
+        #   "publication_name": "AT15-51.dbf",
+        #   "path": "data/files/public/idata_files/AT15-51.dbf",
+        #   "type": "single"
+        # }
+
         mock_body = json.dumps(mock_msg, indent=4)
         mock_body = mock_body.encode()
         callback(None, None, None, mock_body)
