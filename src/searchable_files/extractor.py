@@ -153,7 +153,7 @@ def multiplefile2dict(file_uuid, path, settings, publication_name, description, 
 
     merged_data['schemaorgJson'] = merged_schemaorg
     merged_data['relpath'] = path
-    merged_data['name'] = name
+    merged_data['name'] = publication_name
     merged_data.pop('size_bytes')
 
     return merged_data
