@@ -47,7 +47,7 @@ def callback(ch, method, properties, body):
         print(f'[callback] err_msg={err_msg}')
         return err_msg
     source_dir = f"{msg['path']}"
-    target_dir = f"/persistent/{msg['user_id']}"
+    target_dir = f"/persistent/{msg['user_id']}/{msg['uuid']}"
     copy_files(source_dir, target_dir)
 
     # todo better way to do error handling

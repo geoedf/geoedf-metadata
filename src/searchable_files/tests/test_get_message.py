@@ -20,6 +20,7 @@ class Test(TestCase):
         # }
         mock_msg = {
             "uuid": str(uuid.uuid4()),
+            "user_id": "qu112@purdue.edu",
             "publication_name": "gds_test_shp",
             "path": "data/files/Riv2",
             # "path": "staging/20240311085013",

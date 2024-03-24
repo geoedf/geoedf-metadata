@@ -99,6 +99,7 @@ def watcher_handler(task_id_file):
             results_detail.append(client.get_task(task_id))
             if delay is not None:
                 time.sleep(delay)
+    click.echo(f"results_detail = {results_detail}")
 
     n = len(results)
     if all(results):

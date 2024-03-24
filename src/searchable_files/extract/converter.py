@@ -1,7 +1,5 @@
-import os
 import datetime
-import time
-import uuid
+import os
 
 RESOURCE_URL_PREFIX = "https://geoedf-portal.anvilcloud.rcac.purdue.edu/resource"
 SITE_URL_PREFIX = "https://geoedf-portal.anvilcloud.rcac.purdue.edu"
@@ -14,9 +12,10 @@ def idata2schemaorg(filename, data, file_uuid, settings):
     info = os.stat(filename)
     # print(data)
     spatial_coverage = get_spatial_coverage(data)
-    print("spatial_coverage" + str(spatial_coverage))
+    # print("spatial_coverage" + str(spatial_coverage))
     creator = get_creator(data, AFFILIATION_NAME, CREATOR_NAME, CREATOR_EMAIL, None)
     identifier = get_identifier_list(data, file_uuid)
+    download_url = f'{RESOURCE_URL_PREFIX}/api/download/{file_uuid}'
 
     schemaorg_json = {
         "@context": "https://schema.org",
@@ -59,13 +58,15 @@ def idata2schemaorg(filename, data, file_uuid, settings):
             "name": "GeoEDF",
             "url": f'{SITE_URL_PREFIX}'
         },
-
-        # "license": {
-        #     "@type": "CreativeWork",
-        #     "text": "This resource is shared under the Creative Commons Attribution CC BY.",
-        #     "url": "http://creativecommons.org/licenses/by/4.0/"
-        # },
-        "license": "http://creativecommons.org/licenses/by/4.0/",  # todo some other has a slice
+        "dcat:landingPage": {
+            "@id": f'{RESOURCE_URL_PREFIX}/{file_uuid}',
+        },
+        "license": {
+            "@type": "CreativeWork",
+            "text": "This resource is shared under the Creative Commons Attribution CC BY.",
+            "url": "http://creativecommons.org/licenses/by/4.0/"
+        },
+        # "license": "http://creativecommons.org/licenses/by/4.0/",  # todo some other has a slice
 
         "isAccessibleForFree": True,
         "dateModified": datetime.datetime.fromtimestamp(info.st_mtime).isoformat(),
@@ -81,7 +82,7 @@ def idata2schemaorg(filename, data, file_uuid, settings):
             "@type": "DataDownload",
             "encodingFormat": "application/zip",
             "contentUrl": "https://www.hydroshare.org/hsapi/resource/645bcfee68cd4edbb19883cde0c7597c/",
-            "identifier": f'{RESOURCE_URL_PREFIX}/{file_uuid}'
+            "identifier": f'{download_url}'
         }
     }
 
@@ -116,7 +117,13 @@ def get_identifier_list(data, file_uuid):
     # return [f'{RESOURCE_URL_PREFIX}/{file_uuid}']  # todo check the form of identifier
 
     if data is None:
-        return [f'{RESOURCE_URL_PREFIX}/{file_uuid}']
+        return [{
+            "@type": "PropertyValue",
+            "url":f'{RESOURCE_URL_PREFIX}/{file_uuid}',
+            "@id":  file_uuid,
+            "name": f'{RESOURCE_URL_PREFIX}/{file_uuid}'
+        }]
+        # return [f'{RESOURCE_URL_PREFIX}/{file_uuid}']
     identifier = {
         "@type": "PropertyValue",
     }
