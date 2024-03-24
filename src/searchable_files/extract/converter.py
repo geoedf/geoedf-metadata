@@ -64,7 +64,7 @@ def idata2schemaorg(filename, data, file_uuid, settings):
             "@type": "CreativeWork",
             "text": "This resource is shared under the Creative Commons Attribution CC BY.",
             "url": "http://creativecommons.org/licenses/by/4.0/"
-        },
+        },  # todo some other has a slice
 
         "isAccessibleForFree": True,
         "dateModified": datetime.datetime.fromtimestamp(info.st_mtime).isoformat(),

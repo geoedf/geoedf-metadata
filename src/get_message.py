@@ -9,6 +9,7 @@ from searchable_files import extractor, assembler, submitter
 from searchable_files.assembler import assemble_handler
 from searchable_files.constants import RMQ_NAME, INDEX_ID
 from searchable_files.extractor import extract_handler, yaml
+from searchable_files.file_manager import copy_files
 from searchable_files.submitter import submit_handler
 
 # Establish a connection to RabbitMQ rabbitmq-server
@@ -33,7 +34,6 @@ def get_channel():
 
 
 def callback(ch, method, properties, body):
-    print(" [x] Received %r" % body.decode())
     msg = json.loads(body.decode())
     print("Received message:", msg)
 
@@ -41,8 +41,13 @@ def callback(ch, method, properties, body):
     assemble_settings = assembler.Settings(yaml.load(open(assembler.SETTING_PATH)))
     submit_settings = submitter.Settings(yaml.load(open(submitter.SETTING_PATH)))
 
+    # copy files from staging to persistent
+    source_dir = f"/staging/{msg['path']}"
+    target_dir = f"/persistent/{msg['user_id']}"
+    copy_files(source_dir, target_dir)
+
     # todo better way to do error handling
-    err = extract_handler(msg['uuid'], msg['publication_name'], msg['path'], True, msg['type'], msg['description'],
+    err = extract_handler(msg['uuid'], msg['publication_name'], target_dir, True, msg['type'], msg['description'],
                           msg['keywords'])
     if err is not None:
         err_msg = "failed at extrator"
