@@ -60,11 +60,12 @@ def idata2schemaorg(filename, data, file_uuid, settings):
             "url": f'{SITE_URL_PREFIX}'
         },
 
-        "license": {
-            "@type": "CreativeWork",
-            "text": "This resource is shared under the Creative Commons Attribution CC BY.",
-            "url": "http://creativecommons.org/licenses/by/4.0/"
-        },  # todo some other has a slice
+        # "license": {
+        #     "@type": "CreativeWork",
+        #     "text": "This resource is shared under the Creative Commons Attribution CC BY.",
+        #     "url": "http://creativecommons.org/licenses/by/4.0/"
+        # },
+        "license": "http://creativecommons.org/licenses/by/4.0/",  # todo some other has a slice
 
         "isAccessibleForFree": True,
         "dateModified": datetime.datetime.fromtimestamp(info.st_mtime).isoformat(),

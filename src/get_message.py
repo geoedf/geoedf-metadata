@@ -44,6 +44,7 @@ def callback(ch, method, properties, body):
     # copy files from staging to persistent
     if 'path' not in msg:
         err_msg = "path of file(s) is null"
+        print(f'[callback] err_msg={err_msg}')
         return err_msg
     source_dir = f"{msg['path']}"
     target_dir = f"/persistent/{msg['user_id']}"
@@ -54,10 +55,12 @@ def callback(ch, method, properties, body):
                           msg['keywords'])
     if err is not None:
         err_msg = "failed at extrator"
+        print(f'[callback] err_msg={err_msg}')
         return err_msg
     err = assemble_handler(extract_settings.output_path, True)
     if err is not None:
         err_msg = "failed at assembler"
+        print(f'[callback] err_msg={err_msg}')
         return err_msg
 
     print(f'[callback] {assemble_settings.output_path}')
