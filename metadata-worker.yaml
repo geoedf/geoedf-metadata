@@ -15,11 +15,24 @@ spec:
     spec:
       containers:
       - name: metadata-worker
-        image: registry.anvil.rcac.purdue.edu/geoedf/geoedf-metadata:9
+        image: registry.anvil.rcac.purdue.edu/geoedf/geoedf-metadata:11
         ports:
         - containerPort: 5673
+        volumeMounts:
+          - mountPath: /staging
+            name: vol-staging
+          - mountPath: /persistent
+            name: vol-persistent
       imagePullSecrets:
       - name: qyq-geoedf
+
+      volumes:
+        - name: vol-staging
+          persistentVolumeClaim:
+            claimName: geoedf-staging
+        - name: vol-persistent
+          persistentVolumeClaim:
+            claimName: geoedf-persistent
 ---
 apiVersion: v1
 kind: Service

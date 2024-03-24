@@ -42,7 +42,10 @@ def callback(ch, method, properties, body):
     submit_settings = submitter.Settings(yaml.load(open(submitter.SETTING_PATH)))
 
     # copy files from staging to persistent
-    source_dir = f"/staging/{msg['path']}"
+    if 'path' not in msg:
+        err_msg = "path of file(s) is null"
+        return err_msg
+    source_dir = f"{msg['path']}"
     target_dir = f"/persistent/{msg['user_id']}"
     copy_files(source_dir, target_dir)
 
