@@ -11,7 +11,7 @@ import click
 import ruamel.yaml
 from identify import identify
 
-from .extract.converter import idata2schemaorg, RESOURCE_URL_PREFIX
+from .extract.converter import idata2schemaorg, RESOURCE_URL_PREFIX, get_identifier_list
 from .extract.extract_metadata import extract_metadata
 from .lib import all_filenames, common_options, prettyprint_json
 
@@ -280,6 +280,7 @@ def extract_handler(uuid, publication_name, path, clean, file_type, description,
     old_cwd = os.getcwd()
     # os.chdir(directory)
     print(f"[extract_handler] settings={settings}")
+    # identifier = get_identifier_list(data, file_uuid)
 
     rendered_data = {}
     # in all_filenames("single_files")

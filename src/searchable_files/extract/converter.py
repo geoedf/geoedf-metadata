@@ -78,16 +78,9 @@ def idata2schemaorg(filename, data, file_uuid, settings):
         },
         "distribution": {
             "@type": "DataDownload",
-            "contentSize": "91.8 MB",
             "encodingFormat": "application/zip",
             "contentUrl": "https://www.hydroshare.org/hsapi/resource/645bcfee68cd4edbb19883cde0c7597c/",
-            "description": "Zipped BagIt Bag containing the HydroShare Resource",
-            "dateModified": "2024-01-20T10:53:59.988793+00:00",
-
-            "identifier": [
-                "https://www.hydroshare.org/resource/645bcfee68cd4edbb19883cde0c7597c"
-            ]
-
+            "identifier": f'{RESOURCE_URL_PREFIX}/{file_uuid}'
         }
     }
 
@@ -122,7 +115,7 @@ def get_identifier_list(data, file_uuid):
     # return [f'{RESOURCE_URL_PREFIX}/{file_uuid}']  # todo check the form of identifier
 
     if data is None:
-        return None
+        return [f'{RESOURCE_URL_PREFIX}/{file_uuid}']
     identifier = {
         "@type": "PropertyValue",
     }
@@ -137,7 +130,7 @@ def get_identifier_list(data, file_uuid):
 
 def get_creator(data, affiliation, name, email, url):
     if url is None:
-        url = SITE_URL_PREFIX+"/accounts/profile/"
+        url = SITE_URL_PREFIX + "/accounts/profile/"
     return {
         "@list": [
             {
