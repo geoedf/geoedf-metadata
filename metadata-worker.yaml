@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: metadata-worker
-        image: registry.anvil.rcac.purdue.edu/geoedf/geoedf-metadata:12
+        image: registry.anvil.rcac.purdue.edu/geoedf/geoedf-metadata:14
         ports:
         - containerPort: 5673
         volumeMounts:
