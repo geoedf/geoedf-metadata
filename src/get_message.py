@@ -48,7 +48,7 @@ def callback(ch, method, properties, body):
         return
 
     # copy files from staging to persistent
-    if 'path' not in msg:
+    if not msg.path:
         err_msg = "path of file(s) is null"
         print(f'[callback] err_msg={err_msg}')
         return err_msg
