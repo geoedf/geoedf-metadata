@@ -15,7 +15,7 @@ def idata2schemaorg(filename, data, file_uuid, settings):
     # print("spatial_coverage" + str(spatial_coverage))
     creator = get_creator(data, AFFILIATION_NAME, CREATOR_NAME, CREATOR_EMAIL, None)
     identifier = get_identifier_list(data, file_uuid)
-    download_url = f'{RESOURCE_URL_PREFIX}/api/download/{file_uuid}'
+    download_url = f'{SITE_URL_PREFIX}/api/resource/download/{file_uuid}'
 
     schemaorg_json = {
         "@context": "https://schema.org",
@@ -80,9 +80,10 @@ def idata2schemaorg(filename, data, file_uuid, settings):
         },
         "distribution": {
             "@type": "DataDownload",
+            "contentSize": "46.4 MB",
             "encodingFormat": "application/zip",
-            "contentUrl": "https://www.hydroshare.org/hsapi/resource/645bcfee68cd4edbb19883cde0c7597c/",
-            "identifier": f'{download_url}'
+            "contentUrl": f'{download_url}',
+            "identifier": [f'{RESOURCE_URL_PREFIX}/{file_uuid}']
         }
     }
 

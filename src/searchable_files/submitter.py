@@ -1,12 +1,11 @@
 import json
 import os
-from pathlib import Path
 
 import click
+import ruamel.yaml
 
 from .lib import all_filenames, common_options, search_client, token_storage_adapter
 from .lib.search import app_search_client
-import ruamel.yaml
 
 
 class Settings:
