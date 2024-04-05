@@ -6,7 +6,6 @@ import pika
 import requests
 from pika.exceptions import AMQPConnectionError
 
-from config import GEOEDF_PORTAL_API_URL
 from models import Message
 from searchable_files import extractor, assembler, submitter
 from searchable_files.assembler import assemble_handler
@@ -98,6 +97,9 @@ def get_task_id(task_id_file):
                 task_ids.add(line.strip())
     if len(task_id_file) > 0:
         return task_id_file[0]
+
+
+GEOEDF_PORTAL_API_URL = "https://geoedf-portal.anvilcloud.rcac.purdue.edu/api"
 
 
 def update_task_id_to_portal(jupyter_api_token, resource_id, task_id):
