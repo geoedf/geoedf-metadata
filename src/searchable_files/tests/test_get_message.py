@@ -3,7 +3,7 @@ import os
 import uuid
 from unittest import TestCase
 
-from get_message import callback
+from get_message import callback, get_task_id
 
 
 class Test(TestCase):
@@ -39,3 +39,8 @@ class Test(TestCase):
         mock_body = json.dumps(mock_msg, indent=4)
         mock_body = mock_body.encode()
         callback(None, None, None, mock_body)
+
+    def test_get_task_id(self):
+        task_id_file = "output/worker_metadata/submitted/tasks.txt"
+        task_id = get_task_id(task_id_file)
+        print(task_id)

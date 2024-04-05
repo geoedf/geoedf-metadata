@@ -20,6 +20,9 @@ RMQ_PASS = 'guest'
 RMQ_HOST_IP = '172.17.0.3'
 RMQ_SERVICE_NAME = 'rabbitmq-service'
 
+from pathlib import Path
+
+ROOT_DIR = Path(__file__).resolve().parent.parent
 
 def get_channel():
     credentials = pika.PlainCredentials(RMQ_USER, RMQ_PASS)
@@ -88,7 +91,10 @@ def callback(ch, method, properties, body):
     print(f'[callback] success in submitter')
 
 
+
+
 def get_task_id(task_id_file):
+    os.chdir(ROOT_DIR)
     task_ids = set()
     with open(task_id_file) as fp:
         for line in fp:
@@ -96,7 +102,7 @@ def get_task_id(task_id_file):
             if line:  # skip empty
                 task_ids.add(line.strip())
     if len(task_id_file) > 0:
-        return task_id_file[0]
+        return task_ids.pop()
 
 
 GEOEDF_PORTAL_API_URL = "https://geoedf-portal.anvilcloud.rcac.purdue.edu/api"
