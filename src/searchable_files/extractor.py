@@ -11,11 +11,216 @@ import click
 import ruamel.yaml
 from identify import identify
 
-from .extract.converter import idata2schemaorg, RESOURCE_URL_PREFIX, get_identifier_list
+from .extract.converter import RESOURCE_URL_PREFIX, SITE_URL_PREFIX, get_creator, get_spatial_coverage, \
+    get_identifier_list
 from .extract.extract_metadata import extract_metadata
 from .lib import all_filenames, common_options, prettyprint_json
 
 yaml = ruamel.yaml.YAML(typ="safe")
+
+
+class FileMetadata:
+    def __init__(self, filename, file_uuid, creator_info, settings):
+        self.filename = filename
+        self.settings = settings
+        self._uuid = file_uuid
+        self._creator_info = creator_info
+
+        self._name = os.path.basename(self.filename)
+        self._size = os.stat(self.filename).st_size
+        self._date_created = datetime.datetime.fromtimestamp(os.stat(self.filename).st_mtime).isoformat()
+        self._date_modified = datetime.datetime.fromtimestamp(os.stat(self.filename).st_mtime).isoformat()
+        self._date_published = datetime.datetime.now().isoformat()
+        self._tags = list(identify.tags_from_path(self.filename))
+        self._extension = extension(self.filename)
+        self._preview = read_head(self.filename, self.settings)
+
+        # resource properties
+        self._url = None
+        self._description = None
+        self._spatial_coverage = None
+        self._temporal_coverage = None
+        self._identifier = None
+        self._download_url = None
+
+    @property
+    def uuid(self):
+        return self._uuid
+
+    @property
+    def name(self):
+        return self._name
+
+    @property
+    def size(self):
+        return self._size
+
+    @property
+    def date_created(self):
+        return self._date_created
+
+    @property
+    def date_modified(self):
+        return self._date_modified
+
+    @property
+    def date_published(self):
+        return self._date_published
+
+    @property
+    def tags(self):
+        return self._tags
+
+    @property
+    def extension(self):
+        return self._extension
+
+    @property
+    def preview(self):
+        return self._preview
+
+    @property
+    def creator_info(self):
+        return self._creator_info
+
+    @creator_info.setter
+    def creator_info(self, value):
+        self._creator_info = value
+
+    @property
+    def description(self):
+        return self._description
+
+    @description.setter
+    def description(self, value):
+        self._description = value
+
+    @property
+    def spatial_coverage(self):
+        return self._spatial_coverage
+
+    @spatial_coverage.setter
+    def spatial_coverage(self, value):
+        self._spatial_coverage = value
+
+    @property
+    def temporal_coverage(self):
+        return self._temporal_coverage
+
+    @temporal_coverage.setter
+    def temporal_coverage(self, value):
+        self._temporal_coverage = value
+
+    @property
+    def identifier(self):
+        return self._identifier
+
+    @identifier.setter
+    def identifier(self, value):
+        self._identifier = value
+
+    @property
+    def url(self):
+        return self._url
+
+    @url.setter
+    def url(self, value):
+        self._url = value
+
+    @property
+    def download_url(self):
+        return self._download_url
+
+    @download_url.setter
+    def download_url(self, value):
+        self._download_url = value
+
+    def update_metadata(self, idata_metadata):
+        self.spatial_coverage = get_spatial_coverage(idata_metadata)
+        self.url = f'{RESOURCE_URL_PREFIX}/{self.uuid}'
+        self.identifier = get_identifier_list(idata_metadata, self.uuid)
+        self.download_url = f'{SITE_URL_PREFIX}/api/resource/download/{self.uuid}'
+        return None
+
+    def to_dict(self):
+        return {
+            "name": self.name,
+            "size": self.size,
+            "modification_time": self.date_modified,
+            "tags": self.tags,
+            "extension": self.extension,
+            "preview": self.preview,
+            "uuid": self.uuid
+        }
+
+    def to_schemaorg(self):
+        creator_schemaorg = get_creator(self.creator_info)
+
+        schemaorg_json = {
+            "@context": "https://schema.org",
+            "@id": self.uuid,  # should be a url?
+            "sameAs": self.url,
+            "url": self.url,
+
+            "@type": "Dataset",
+            # "additionalType": "link",
+            "name": self.name,
+            "description": f'This publication {self.name} is a resource in GeoEDF Portal. ',
+            "keywords": ["Keyword1", "Keyword2", "Keyword3"],
+            "creativeWorkStatus": "Published",
+            # "inLanguage": "en-US",
+
+            "identifier": self.identifier,
+            "creator": creator_schemaorg,
+            "temporalCoverage": "2018-05-24/2019-06-24",
+            "spatialCoverage": self.spatial_coverage,
+            "publisher": {
+                "@type": "Organization",
+                "name": "Purdue University"
+            },
+            "provider": {
+                "@id": SITE_URL_PREFIX,
+                "@type": "Organization",
+                "name": "GeoEDF Portal",
+                "url": SITE_URL_PREFIX,
+            },
+            "includedInDataCatalog": {
+                "@type": "DataCatalog",
+                "name": "GeoEDF",
+                "url": f'{SITE_URL_PREFIX}'
+            },
+            "dcat:landingPage": {
+                "@id": self.url,
+            },
+            "license": {
+                "@type": "CreativeWork",
+                "text": "This resource is shared under the Creative Commons Attribution CC BY.",
+                "url": "http://creativecommons.org/licenses/by/4.0/"
+            },
+
+            "isAccessibleForFree": True,
+            "dateModified": self.date_modified,
+            "datePublished": self.date_published,
+            "subjectOf": {
+                "@type": "DataDownload",
+                "name": "resourcemetadata.xml",
+                "description": "Description about the dataset",
+                "url": self.url,
+                "encodingFormat": "application/rdf+xml"
+            },
+            "distribution": {
+                "@type": "DataDownload",
+                "contentSize": "46.4 MB",
+                "encodingFormat": "application/zip",
+                "contentUrl": f'{self.download_url}',
+                "identifier": [self.url]
+            }
+        }
+
+        return schemaorg_json
+
+    def to_json(self):
+        return json.dumps(self.to_dict(), indent=4)
 
 
 def file_tags(filename):
@@ -84,24 +289,28 @@ def get_description(filename, settings):
     return read_head(filename, settings)
 
 
-def filename2dict(file_uuid, filename, settings):
+def filename2dict(file_uuid, filename, settings, creator_info):
     print("\n===========\nfilename: " + filename)
     info = os.stat(filename)
     if file_uuid is None:
         file_uuid = str(uuid.uuid4())
-    schemaorg_json_obj = metadata2schemaorg(filename, file_uuid, settings)
+
+    file_metadata = FileMetadata(filename, file_uuid, creator_info, settings)
+    if creator_info is not None:
+        file_metadata.creator = get_creator(creator_info)
+    schemaorg_json_obj = metadata2schemaorg(file_metadata)
     # schemaorg_json_obj_static = metadata2schemaorg_static(filename, settings)
     return {
-        "relpath": filename,
+        "relpath": file_metadata.filename,
         **stat_dict(filename),
-        "head": read_head(filename, settings),
-        "tags": file_tags(filename),
-        "extension": extension(filename),
-        "name": os.path.basename(filename),
+        "head": file_metadata.preview,
+        "tags": file_metadata.tags,
+        "extension": file_metadata.extension,
+        "name": file_metadata.name,
         "identifier": file_uuid,
         "title": os.path.basename(filename),
-        "dateCreated": datetime.datetime.fromtimestamp(info.st_mtime).isoformat(),
-        "dateModified": datetime.datetime.fromtimestamp(info.st_mtime).isoformat(),
+        "dateCreated": file_metadata.date_created,
+        "dateModified": file_metadata.date_modified,
         "description": get_description(filename, settings),
         "basicInfo": get_basic_info(filename, settings, file_uuid),
         "subject": file_uuid,
@@ -125,7 +334,7 @@ def multiplefile2dict(file_uuid, path, settings, publication_name, description, 
     merged_has_part = []
     # in all_filenames("single_files")
     for filename in all_filenames("."):
-        rendered_data[filename] = filename2dict(file_uuid, filename, settings)
+        rendered_data[filename] = filename2dict(file_uuid, filename, settings, creator)
         if merged_data is None:
             merged_data = rendered_data[filename]
         if "schemaorgJson" in merged_data:
@@ -170,11 +379,14 @@ def get_sub_data(schemaorg_data):
     }
 
 
-def metadata2schemaorg(filename, file_uuid, settings):
-    metadata = extract_metadata(filename)
-    print(json.dumps(metadata))
+def metadata2schemaorg(file_metadata: FileMetadata):
+    idata_metadata = extract_metadata(file_metadata.filename)
+    print(json.dumps(idata_metadata))
 
-    return idata2schemaorg(filename, metadata, file_uuid, settings)
+    file_metadata.update_metadata(idata_metadata)
+    return file_metadata.to_schemaorg()
+    # return idata2schemaorg(file_metadata.filename, idata_metadata, file_metadata.uuid, file_metadata.creator_info,
+    #                        file_metadata.settings)
 
 
 def target_file(output_directory, filename):
@@ -270,7 +482,7 @@ def extract_cli(settings, directory, output, clean):
 SETTING_PATH = "data/config/extractor.yaml"
 
 
-def extract_handler(uuid, publication_name, path, clean, file_type, description, keywords):
+def extract_handler(uuid, publication_name, path, clean, file_type, description, keywords, user_email):
     settings = Settings(yaml.load(open(SETTING_PATH)))
     output = settings.output_path
 
@@ -281,18 +493,22 @@ def extract_handler(uuid, publication_name, path, clean, file_type, description,
     # os.chdir(directory)
     print(f"[extract_handler] settings={settings}")
     # identifier = get_identifier_list(data, file_uuid)
+    creator_info = {
+        "email": user_email,
+        # "name": "", # get name from cilogon?
+    }
 
     rendered_data = {}
     # in all_filenames("single_files")
     if file_type == "single":
-        rendered_data[path] = filename2dict(uuid, path, settings, )
+        rendered_data[path] = filename2dict(uuid, path, settings, creator_info)
     elif file_type == "multiple":
-        rendered_data[path] = multiplefile2dict(uuid, path, settings, publication_name, description, keywords, None)
-        # todo creator
+        rendered_data[path] = multiplefile2dict(uuid, path, settings, publication_name, description, keywords,
+                                                creator_info)
     elif file_type == "list":
         path_list = path
         for p in path_list:
-            rendered_data[path] = filename2dict(uuid, p, settings)
+            rendered_data[path] = filename2dict(uuid, p, settings, creator_info)
 
     os.chdir(old_cwd)
     for filename, data in rendered_data.items():

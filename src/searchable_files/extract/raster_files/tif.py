@@ -27,7 +27,8 @@ def getMetadata(filepath):
         src_crs.ImportFromWkt(datasource.GetProjection())
 
         # Determine if the source CRS is geographic or projected
-        if src_crs.IsGeographic():
+        # if src_crs.IsGeographic():
+        if True:
             # If geographic, no transformation is needed
             data['northlimit'] = max(uly, lly, lry, ury)
             data['southlimit'] = min(uly, lly, lry, ury)
@@ -35,6 +36,7 @@ def getMetadata(filepath):
             data['westlimit'] = min(ulx, llx, lrx, urx)
         else:
             # If projected, convert to WGS84
+
             # todo debug the code in this condition
             tgt_crs = osr.SpatialReference()
             tgt_crs.ImportFromEPSG(4326)  # WGS84

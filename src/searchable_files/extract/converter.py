@@ -8,12 +8,13 @@ CREATOR_NAME = "Yiqing Qu"
 CREATOR_EMAIL = "qu112@purdue.edu"
 
 
-def idata2schemaorg(filename, data, file_uuid, settings):
+def idata2schemaorg(filename, data, file_uuid, creator_info, settings):
     info = os.stat(filename)
     # print(data)
     spatial_coverage = get_spatial_coverage(data)
     # print("spatial_coverage" + str(spatial_coverage))
-    creator = get_creator(data, AFFILIATION_NAME, CREATOR_NAME, CREATOR_EMAIL, None)
+
+    creator = get_creator(creator_info)
     identifier = get_identifier_list(data, file_uuid)
     download_url = f'{SITE_URL_PREFIX}/api/resource/download/{file_uuid}'
 
@@ -137,20 +138,20 @@ def get_identifier_list(data, file_uuid):
     return [identifier]
 
 
-def get_creator(data, affiliation, name, email, url):
-    if url is None:
-        url = SITE_URL_PREFIX + "/accounts/profile/"
+def get_creator(creator_info):
+    if creator_info is None:
+        return None
     return {
         "@list": [
             {
                 "@type": "Person",
                 "affiliation": {
                     "@type": "Organization",
-                    "name": affiliation,
+                    "name": creator_info.get("affiliation"),
                 },
-                "email": email,
-                "name": name,
-                "url": url,
+                "email": creator_info.get("email"),
+                "name": creator_info.get("name"),
+                "url": creator_info.get("url", SITE_URL_PREFIX + "/accounts/profile/"),
             }
         ]
     }

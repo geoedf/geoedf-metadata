@@ -40,6 +40,7 @@ class Message:
         msg_data = json.loads(body.decode())
         self.uuid = msg_data.get('uuid')
         self.user_jupyter_token = msg_data.get('user_jupyter_token')
+        self.user_email = msg_data.get('user_id')
         self.path = msg_data.get('path')
         self.publication_name = msg_data.get('publication_name')
         self.type = msg_data.get('type')
@@ -52,4 +53,5 @@ class Message:
 
     @property
     def target_dir(self):
-        return f"/persistent/{self.uuid}"
+        return self.path
+        # return f"/persistent/{self.uuid}"

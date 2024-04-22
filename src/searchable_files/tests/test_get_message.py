@@ -26,7 +26,7 @@ class TestExtraction(TestCase):
             "publication_name": "bogota data test",
             "path": "data/files/single_file/bogota.tif",
             # "path": "staging/20240311085013",
-            "type": "multiple",
+            "type": "single",
             "description": "This is the description of a resource published from GeoEDF Publish Wizard. (Test)",
             "keywords": ["111", "222"],  # todo
             "publication_type": "Geospatial Files",
