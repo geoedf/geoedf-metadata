@@ -53,5 +53,4 @@ class Message:
 
     @property
     def target_dir(self):
-        return self.path
-        # return f"/persistent/{self.uuid}"
+        return f"/persistent/{self.uuid}"
