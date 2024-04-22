@@ -1,3 +1,21 @@
+# Portal
+
+# Testing and Debugging
+## Integration Test 
+1. Trigger extraction process by calling Portal's API, and view the container's logs
+2. Trigger extraction process by sending a message from message queue management portal, and view the container's log
+
+## Unit Test 
+In `src/searchable_files/tests`, 
+
+
+
+## Todos
+1. Keyword
+
+
+
+
 # Searchable Files (demo)
 
 This demo application shows how Globus Search can be used to build an index of

@@ -1,4 +1,4 @@
-from osgeo import gdal
+from osgeo import gdal, osr
 
 # --------------- for datasource file ------------------#
 
@@ -12,67 +12,51 @@ LOG_PATH = '/tmp/messages.txt'
 
 def getMetadata(filepath):
     data = {}
-
     datasource = gdal.Open(filepath)
+    if datasource is None:
+        return None
 
     try:
-        if datasource.RasterXSize is not None:
-            data['xsize'] = datasource.RasterXSize
-        if datasource.RasterYSize is not None:
-            data['ysize'] = datasource.RasterYSize
+        data['xsize'] = datasource.RasterXSize
+        data['ysize'] = datasource.RasterYSize
+
         ulx, uly, llx, lly, lrx, lry, urx, ury = getCoverage(datasource)
-    except:
+
+        # Get source CRS from dataset
+        src_crs = osr.SpatialReference()
+        src_crs.ImportFromWkt(datasource.GetProjection())
+
+        # Determine if the source CRS is geographic or projected
+        if src_crs.IsGeographic():
+            # If geographic, no transformation is needed
+            data['northlimit'] = max(uly, lly, lry, ury)
+            data['southlimit'] = min(uly, lly, lry, ury)
+            data['eastlimit'] = max(ulx, llx, lrx, urx)
+            data['westlimit'] = min(ulx, llx, lrx, urx)
+        else:
+            # If projected, convert to WGS84
+            # todo debug the code in this condition
+            tgt_crs = osr.SpatialReference()
+            tgt_crs.ImportFromEPSG(4326)  # WGS84
+            transform = osr.CoordinateTransformation(src_crs, tgt_crs)
+
+            # Transform points
+            ulx, uly, _ = transform.TransformPoint([ulx, uly])
+            llx, lly, _ = transform.TransformPoint(llx, lly)
+            lrx, lry, _ = transform.TransformPoint(lrx, lry)
+            urx, ury, _ = transform.TransformPoint(urx, ury)
+
+            # Compute geographic limits
+            longitudes = [ulx, llx, lrx, urx]
+            latitudes = [uly, lly, lry, ury]
+            data['northlimit'] = max(latitudes)
+            data['southlimit'] = min(latitudes)
+            data['eastlimit'] = max(longitudes)
+            data['westlimit'] = min(longitudes)
+
+    except Exception as e:
         with open(LOG_PATH, 'a+') as logfile:
-            logfile.write('exception occurred getting metadata for tif file')
-
-    longitudes = [ulx, llx, lrx, urx]
-    latitudes = [uly, lly, lry, ury]
-    data['northlimit'] = uly
-    data['southlimit'] = lly
-    data['eastlimit'] = urx
-    data['westlimit'] = ulx
-    data['latmin'] = min(longitudes)
-    data['latmax'] = max(longitudes)
-    data['lonmin'] = min(latitudes)
-    data['lonmax'] = max(latitudes)
-
-    # geotif-related metadata
-    metadata = datasource.GetMetadata()
-    if metadata is not None:
-        if 'TIFFTAG_DOCUMENTNAME' in metadata:
-            data['title'] = metadata.pop('TIFFTAG_DOCUMENTNAME')
-        if 'TIFFTAG_IMAGEDESCRIPTION' in metadata:
-            data['description'] = metadata.pop('TIFFTAG_IMAGEDESCRIPTION')
-        if 'TIFFTAG_DATETIME' in metadata:
-            data['date'] = metadata.pop('TIFFTAG_DATETIME')
-        if 'TIFFTAG_SOFTWARE' in metadata:
-            data['source'] = metadata.pop('TIFFTAG_SOFTWARE')
-        if 'TIFFTAG_ARTIST' in metadata:
-            data['creator'] = metadata.pop('TIFFTAG_ARTIST')
-
-    # get subdata, which in the case of a GeoTiff file could be the color interpretation of each band
-    subdata = {}
-    for band_num in range(datasource.RasterCount, 1):
-        band = datasource.GetRasterBand(band_num)
-        band_description = band.GetDescription()
-        band_color_interp = band.GetColorInterpretation()
-        key = 'sub{}'.format(band_num - 1)  # index should start at 0
-        title = 'Band {}'.format(band_num)
-
-        subdata[key] = {}
-        # if there is a user defined description
-        if band_description is not None and band_description != '':
-            subdata[key]['title'] = title
-            subdata[key]['description'] = band_description
-
-        # if there is a valid color interpretation
-        if band_color_interp is not None and band_color_interp in range(18):
-            subdata[key]['title'] = title
-            subdata[key]['type'] = GDALColorInterp.get(band_color_interp)
-
-    # if there was nonempty subdata, add it to the data dictionary
-    if len(subdata) > 0:
-        data['subdata'] = subdata
+            logfile.write('Exception occurred getting metadata for tif file: ' + str(e))
 
     return data
 

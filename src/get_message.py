@@ -1,6 +1,8 @@
 import json
+import logging
 import os
 import sys
+from contextlib import contextmanager
 
 import pika
 import requests
@@ -24,9 +26,12 @@ from pathlib import Path
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
 
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+
 def get_channel():
     credentials = pika.PlainCredentials(RMQ_USER, RMQ_PASS)
-    # local test
+    # if test locally, use
     # connection = pika.BlockingConnection(
     #     pika.ConnectionParameters(host=RMQ_HOST_IP, port=5672, virtual_host='/', credentials=credentials))
     connection = pika.BlockingConnection(
@@ -38,59 +43,55 @@ def get_channel():
     return channel
 
 
+class ProcessingError(Exception):
+    pass
+
+
+@contextmanager
+def open_settings(path):
+    try:
+        with open(path, 'r') as file:
+            yield yaml.load(file)
+    except Exception as e:
+        logging.error(f'[open_settings] Error loading settings from {path}: {e}')
+        raise ProcessingError(f'Failed to load settings from {path}')
+
+
+def process_message(msg):
+    try:
+        with open_settings(extractor.SETTING_PATH) as extract_settings, \
+                open_settings(assembler.SETTING_PATH) as assemble_settings, \
+                open_settings(submitter.SETTING_PATH) as submit_settings:
+
+            if not msg.path:
+                raise ProcessingError("Path of file(s) is null.")
+
+            copy_files(msg.source_dir, msg.target_dir)
+
+            if extract_handler(msg.uuid, msg.publication_name, msg.target_dir, True, msg.type, msg.description,
+                               msg.keywords):
+                raise ProcessingError("Failed at extractor.")
+            if assemble_handler(extract_settings.output_path, True):
+                raise ProcessingError("Failed at assembler.")
+            if submit_handler(assemble_settings.output_path, INDEX_ID):
+                raise ProcessingError("Failed at submitter.")
+
+            task_id_file = "output/worker_metadata/submitted/tasks.txt"
+            task_id = get_task_id(task_id_file)
+            update_task_id_to_portal(msg.user_jupyter_token, msg.uuid, task_id)
+            logging.info(f'[process_message] Success in submitter, uuid = {msg.uuid}')
+
+    except ProcessingError as pe:
+        logging.error(pe)
+        return str(pe)
+
+
 def callback(ch, method, properties, body):
     msg = Message(body)
-    print("Received message:", msg)
-
-    try:
-        extract_settings = extractor.Settings(yaml.load(open(extractor.SETTING_PATH)))
-        assemble_settings = assembler.Settings(yaml.load(open(assembler.SETTING_PATH)))
-        submit_settings = submitter.Settings(yaml.load(open(submitter.SETTING_PATH)))
-    except Exception as e:
-        print(f'Error loading settings: {e}')
-        return
-
-    # copy files from staging to persistent
-    if not msg.path:
-        err_msg = "path of file(s) is null"
-        print(f'[callback] err_msg={err_msg}')
-        return err_msg
-
-    copy_files(msg.source_dir, msg.target_dir)
-
-    # todo better way to do error handling
-    err = extract_handler(
-        msg.uuid,
-        msg.publication_name,
-        msg.target_dir,
-        True,
-        msg.type,
-        msg.description,
-        msg.keywords
-    )
-    if err is not None:
-        err_msg = "failed at extrator"
-        print(f'[callback] err_msg={err_msg}')
-        return err_msg
-    err = assemble_handler(extract_settings.output_path, True)
-    if err is not None:
-        err_msg = "failed at assembler"
-        print(f'[callback] err_msg={err_msg}')
-        return err_msg
-    err = submit_handler(assemble_settings.output_path, INDEX_ID)
-    if err is not None:
-        err_msg = "failed at submitter"
-        print(f'[callback] err_msg={err_msg}')
-        return err_msg
-    # watch_handler(submit_settings.output_path, INDEX_ID)
-    task_id_file = "output/worker_metadata/submitted/tasks.txt"
-    task_id = get_task_id(task_id_file)
-    # update it to portal
-
-    update_task_id_to_portal(msg.user_jupyter_token, msg.uuid, task_id)
-    print(f'[callback] success in submitter')
-
-
+    logging.info("[callback] Received message: %s", msg)
+    error = process_message(msg)
+    if error:
+        logging.error(f'[callback] Error: {error}')
 
 
 def get_task_id(task_id_file):
