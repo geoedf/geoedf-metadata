@@ -1,4 +1,60 @@
-# Portal
+# Metadata Extractor
+This project facilitates the process of extracting metadata from various file types, assembling this metadata, and then submitting it to a specified index to Globus. 
+It's integrated with RabbitMQ for asynchronously message handling.
+
+
+## Components
+### Message consuming callback function
+`get_message.py`
+
+This script continuously listens for new messages on the configured RabbitMQ queue, process them to extract and assemble metadata, and submit them to Globus Index.
+
+Then, task_id and status of the submission are sent to the portal through an API.
+
+### Extractor
+The Extractor module handles the extraction of metadata from files, supporting multiple file formats. 
+
+Yaml configurations in `data/config/extractor.yaml` are for setting extraction specifics, such as paths and file patterns.
+
+### Assembler
+The Assembler module takes extracted metadata and compiles it into a structured format ready for submission.
+
+### Submitter
+The Submitter module is responsible for submitting the assembled metadata to a designated repository or data index via the Globus platform.
+
+### Watcher
+The Watcher module is used in tracking the status of tasks in the task list file by calling Globus SDK. 
+
+
+
+## Configuration
+Settings can be configured the RabbitMQ settings in get_message.py before running the extractor. The queue created is a transient message queue.
+
+
+## Deploying
+### Local Deployment
+1. Launch the message queue server with `docker-compose run -it rabbitmq-server`.
+2. Update the host to `RMQ_HOST_IP` (`src/get_message.py:34`)
+3. Launch the extraction service (message queue worker) with `docker-compose run -it worker`.
+
+### Anvil Development
+1. To build the image with `Github Actions`, push code to Github repository and track the status of the workflow. 
+2. Github Actions config file is in `.github/workflows/github-actions-demo.yml`. 
+3. Images are stored in [Registry Harbor](registry.anvil.rcac.purdue.edu). Registry server and token information can be set in Settings->Environments->{$ENV_NAME}->Environment Secrets
+2. Once the image is built, update the image tag in the file metadata-worker.yaml
+
+           image: registry.anvil.rcac.purdue.edu/geoedf/geoedf-metadata:{$YOUR_IMAGE_TAG}
+
+3. Using `kubectl` to deploy both message queue server and worker.
+   1. Instruction of local `kubectl` access and rancher web UI access: https://www.rcac.purdue.edu/knowledge/anvil/composable/access/kubectl
+   2. Using the Anvil Registry Docker Hub Cache: https://www.rcac.purdue.edu/index.php/knowledge/anvil/composable/registry#_using_the_anvil_registry_docker_hub_cache
+4. Install kubectl and download kubeconfig from Anvil.
+5. Launch the message queue server with `kubectl -n geoedf apply -f rabbitmq-server.yaml`
+6. Launch the extraction service (message queue worker) with `kubectl -n geoedf apply -f metadata-worker.yaml`
+7. Useful kubectl commands:
+   1. List all services in `geoedf` namespace: `kubectl -n geoedf get services`
+   2. delete previous service: `kubectl -n geoedf delete deployment metadata-worker`
+
 
 # Testing and Debugging
 ## Integration Test 
@@ -6,17 +62,20 @@
 2. Trigger extraction process by sending a message from message queue management portal, and view the container's log
 
 ## Unit Test 
-In `src/searchable_files/tests`, 
-
+In `src/searchable_files/tests`, there are tests for
+1. Each step of the extraction process
+2. Receive message and running all four steps
+3. Interaction with Globus SDK
 
 
 ## Todos
-1. Keyword
+1. Handle keyword value from message
 
 
+---
 
-
-# Searchable Files (demo)
+# Searchable Files Demo 
+(Original `README` content)
 
 This demo application shows how Globus Search can be used to build an index of
 file metadata. Similar to the unix `find` command, it lets you search for files
@@ -35,7 +94,7 @@ some ideas about ways in which the demo can be adapted or extended.
 
 ## Architecture
 
-The demo app is broken up into four main components:
+The workflow is broken up into four main components:
 
 - the **Extractor** (`src/searchable_files/extractor.py`)
 
