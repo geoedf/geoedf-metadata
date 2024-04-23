@@ -9,6 +9,8 @@ It's integrated with RabbitMQ for asynchronously message handling.
 
 This script continuously listens for new messages on the configured RabbitMQ queue, process them to extract and assemble metadata, and submit them to Globus Index.
 
+It copies file(s) from staging area to persistent area.
+
 Then, task_id and status of the submission are sent to the portal through an API.
 
 ### Extractor
@@ -20,7 +22,8 @@ Yaml configurations in `data/config/extractor.yaml` are for setting extraction s
 The Assembler module takes extracted metadata and compiles it into a structured format ready for submission.
 
 ### Submitter
-The Submitter module is responsible for submitting the assembled metadata to a designated repository or data index via the Globus platform.
+The Submitter module is responsible for submitting the assembled metadata to a specified index via the Globus Sdk.
+The index is under the app's role and allows the app to submit or delete data to it. 
 
 ### Watcher
 The Watcher module is used in tracking the status of tasks in the task list file by calling Globus SDK. 
@@ -30,8 +33,11 @@ The Watcher module is used in tracking the status of tasks in the task list file
 ## Configuration
 Settings can be configured the RabbitMQ settings in get_message.py before running the extractor. The queue created is a transient message queue.
 
+### Globus Client Secrets
+[Obtain App keys and tokens here](https://app.globus.org/settings/developers/)
 
 ## Deploying
+If you want to test the full process(which involves portal API calls), ensure that the portal is active before starting the deployment steps.
 ### Local Deployment
 1. Launch the message queue server with `docker-compose run -it rabbitmq-server`.
 2. Update the host to `RMQ_HOST_IP` (`src/get_message.py:34`)
@@ -41,27 +47,27 @@ Settings can be configured the RabbitMQ settings in get_message.py before runnin
 1. To build the image with `Github Actions`, push code to Github repository and track the status of the workflow. 
 2. Github Actions config file is in `.github/workflows/github-actions-demo.yml`. 
 3. Images are stored in [Registry Harbor](registry.anvil.rcac.purdue.edu). Registry server and token information can be set in Settings->Environments->{$ENV_NAME}->Environment Secrets
-2. Once the image is built, update the image tag in the file metadata-worker.yaml
+4. Once the image is built, update the image tag in the file metadata-worker.yaml
 
            image: registry.anvil.rcac.purdue.edu/geoedf/geoedf-metadata:{$YOUR_IMAGE_TAG}
 
-3. Using `kubectl` to deploy both message queue server and worker.
+5. Using `kubectl` to deploy both message queue server and worker.
    1. Instruction of local `kubectl` access and rancher web UI access: https://www.rcac.purdue.edu/knowledge/anvil/composable/access/kubectl
    2. Using the Anvil Registry Docker Hub Cache: https://www.rcac.purdue.edu/index.php/knowledge/anvil/composable/registry#_using_the_anvil_registry_docker_hub_cache
-4. Install kubectl and download kubeconfig from Anvil.
-5. Launch the message queue server with `kubectl -n geoedf apply -f rabbitmq-server.yaml`
-6. Launch the extraction service (message queue worker) with `kubectl -n geoedf apply -f metadata-worker.yaml`
-7. Useful kubectl commands:
+6. Install kubectl and download kubeconfig from Anvil.
+7. Launch the message queue server with `kubectl -n geoedf apply -f rabbitmq-server.yaml`
+8. Launch the extraction service (message queue worker) with `kubectl -n geoedf apply -f metadata-worker.yaml`
+9. Useful kubectl commands:
    1. List all services in `geoedf` namespace: `kubectl -n geoedf get services`
    2. delete previous service: `kubectl -n geoedf delete deployment metadata-worker`
 
 
-# Testing and Debugging
-## Integration Test 
+## Testing and Debugging
+### Integration Test 
 1. Trigger extraction process by calling Portal's API, and view the container's logs
 2. Trigger extraction process by sending a message from message queue management portal, and view the container's log
 
-## Unit Test 
+### Unit Test 
 In `src/searchable_files/tests`, there are tests for
 1. Each step of the extraction process
 2. Receive message and running all four steps
@@ -75,6 +81,8 @@ In `src/searchable_files/tests`, there are tests for
 ---
 
 # Searchable Files Demo 
+https://docs.globus.org/api/search/guides/searchable_files/
+
 (Original `README` content)
 
 This demo application shows how Globus Search can be used to build an index of
